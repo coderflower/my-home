@@ -121,6 +121,7 @@ function sofa(g, w, d) {
 // 满墙电视柜：中间电视龛（悬空地柜 + 顶柜 + 木饰面背板），两侧通顶柜。niche 为电视龛中心的局部 x
 function tvCabinetWall(niche, nicheWidth = 2.6, height = 2.68) {
   const doors = (g, x0, x1, d) => {
+    if (x1 - x0 < 0.1) return;
     const n = Math.max(1, Math.round((x1 - x0) / 0.45));
     const dw = (x1 - x0) / n;
     for (let i = 0; i < n; i++) {
@@ -139,6 +140,24 @@ function tvCabinetWall(niche, nicheWidth = 2.6, height = 2.68) {
     g.add(box(nicheWidth, height - 2.3, d, M.cabinet, niche, 2.3));
     g.add(box(nicheWidth, 1.7, 0.03, M.wood, niche, 0.6, -d / 2 + 0.015));
     g.add(box(1.65, 0.95, 0.04, M.screen, niche, 1.0, -d / 2 + 0.05));
+  };
+}
+
+// 餐边柜：下柜 + 台面 + 木饰面开放格 + 通顶吊柜
+function sideboard(height = 2.68) {
+  return (g, w, d) => {
+    const n = Math.max(2, Math.round(w / 0.45));
+    const dw = w / n;
+    for (let i = 0; i < n; i++) {
+      const x = -w / 2 + dw * (i + 0.5);
+      const hx = x + (i % 2 ? -1 : 1) * (dw / 2 - 0.05);
+      g.add(box(dw - 0.008, 0.82, d, M.cabinet, x));
+      g.add(box(0.02, 0.2, 0.025, M.metal, hx, 0.55, d / 2 + 0.01));
+      g.add(box(dw - 0.008, height - 1.45, d - 0.05, M.cabinet, x, 1.45, -0.025));
+      g.add(box(0.02, 0.2, 0.025, M.metal, hx, 1.5, d / 2 - 0.04));
+    }
+    g.add(box(w, 0.03, d + 0.02, M.counter, 0, 0.82, 0.01));
+    g.add(box(w, 0.6, 0.03, M.wood, 0, 0.85, -d / 2 + 0.015));
   };
 }
 
@@ -278,7 +297,8 @@ export function buildFurniture() {
   place(g, [1.597, -3.175, 2.197, -0.93], 'west', counter);
   place(g, [1.68, -2.5, 2.13, -1.95], 'west', (gg, w, d) => gg.add(box(w, 0.012, d, M.metal, 0, 0.94)));
 
-  // 餐厅，冰箱放在西墙凹槽里
+  // 餐厅，冰箱放在西墙凹槽里，旁边接餐边柜
+  place(g, [-1.803, 0.72, -1.403, 2.5], 'east', sideboard());
   place(g, [-2.153, -0.48, -1.453, 0.42], 'east', fridge);
   place(g, [-0.6, 0.15, 1.0, 0.95], 'south', table(0.75, M.wood));
   for (const x of [-0.3, 0.25]) {
@@ -289,7 +309,7 @@ export function buildFurniture() {
   // 客厅
   rug(g, [-1.2, 2.7, 0.6, 4.9]);
   place(g, [0.75, 2.7, 1.597, 4.9], 'west', sofa);
-  place(g, [-1.803, 0.72, -1.403, 6.02], 'east', tvCabinetWall(-0.43));
+  place(g, [-1.803, 2.5, -1.403, 6.02], 'east', tvCabinetWall(0.46));
   place(g, [-0.6, 3.5, 0.0, 4.1], 'south', (gg) => {
     gg.add(cyl(0.3, 0.3, 0.04, M.white, 0, 0.38));
     gg.add(cyl(0.04, 0.12, 0.38, M.white));

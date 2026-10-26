@@ -33,6 +33,8 @@ ROOMS = {
     '阳台': ('balcony', '阳台', 'outdoor'),
 }
 PRIVATE = {'bath', 'kids', 'master', 'bedroom'}
+# 装修拆除的内墙：两侧房间为这些组合时整段墙不建
+REMOVED_BETWEEN = [{'entry', 'living'}]
 # 装修新增的墙（VR 和 CAD 里都没有），坐标为校正后的最终坐标
 ADDED_WALLS = [
     # 主卧衣帽间：轻钢龙骨隔断，西端与儿童房墙垛之间留 0.6 米入口，朝床一侧开窗
@@ -205,6 +207,13 @@ def main(src, out):
         off = (n0 + n1) / 2
         a = (ax + ux * u0 + nx * off, az + uz * u0 + nz * off)
         b = (ax + ux * u1 + nx * off, az + uz * u1 + nz * off)
+
+        if wall['type'] != 'edge':
+            mx, mz = (ax + bx) / 2, (az + bz) / 2
+            sides = {room['id'] for room in (room_at(mx + nx * 0.3, mz + nz * 0.3, rooms),
+                                              room_at(mx - nx * 0.3, mz - nz * 0.3, rooms)) if room}
+            if sides in REMOVED_BETWEEN:
+                continue
 
         openings = []
         for hole in wall['holes']:
