@@ -536,6 +536,22 @@ function longDesk(work) {
   };
 }
 
+// 儿童房床尾书桌：靠床尾 1.2 米桌下做开放格（床尾空间开不了门），其余为工位
+function kidsDesk(g, w, d) {
+  g.add(box(w, 0.035, d, M.walnut, 0, 0.715));
+  const x1 = -w / 2 + 1.2;
+  for (const x of [-w / 2 + 0.015, -w / 2 + 0.6, x1 - 0.015]) g.add(box(0.03, 0.715, d - 0.02, M.cabinet, x, 0, -0.01));
+  for (const y of [0, 0.35]) g.add(box(1.2, 0.02, d - 0.02, M.cabinet, -w / 2 + 0.6, y, -0.01));
+  books(g, -w / 2 + 0.06, -w / 2 + 0.5, 0.37, -0.05, 0.2);
+  g.add(box(0.45, 0.28, 0.4, M.mustard, x1 - 0.3, 0.02, 0));
+  g.add(box(0.45, 0.25, 0.4, M.sage, x1 - 0.3, 0.37, 0));
+  g.add(box(0.04, 0.715, d - 0.04, M.cabinet, w / 2 - 0.03, 0, -0.01));
+  g.add(box(0.32, 0.015, 0.22, M.metal, x1 + 0.35, 0.75, 0.05));
+  g.add(cyl(0.06, 0.07, 0.02, M.brass, w / 2 - 0.15, 0.75, -d / 2 + 0.12));
+  g.add(cyl(0.008, 0.008, 0.3, M.brass, w / 2 - 0.15, 0.77, -d / 2 + 0.12));
+  g.add(cyl(0.05, 0.09, 0.1, M.cream, w / 2 - 0.15, 1.05, -d / 2 + 0.12));
+}
+
 // 抬高窗台：0.45 米高木台 + 坐垫靠枕，台下抽屉
 function windowSeat(g, w, d) {
   cabinetDoors(g, -w / 2, w / 2, 0.06, 0.37, d - 0.02, 0.5, M.cabinet, 0.3);
@@ -650,13 +666,12 @@ export function buildFurniture(styleId, bayPlan = 'side') {
   place(g, [2.95, -0.73, 3.4, -0.24], 'south', toilet);
   place(g, [3.797, -0.73, 4.797, -0.23], 'south', vanity);
 
-  // 儿童房：东墙床尾柜接书桌，书桌上方吊柜
+  // 儿童房：东墙通长书桌，床尾段桌下为开放格，桌上方开放搁板；南侧凹位衣柜门前留 0.6 米
   place(g, [4.9, -1.63, 6.9, -0.43], 'east', bed(M.kidDuvet));
   place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
-  place(g, [7.197, -1.63, 7.697, -0.43], 'west', wardrobe(2.4));
-  place(g, [7.197, -0.43, 7.697, 0.92], 'west', desk);
-  place(g, [7.347, -0.43, 7.697, 0.92], 'west', wallCabinet(1.85, 0.55));
-  place(g, [6.7, 0.0, 7.15, 0.45], 'east', chair);
+  place(g, [7.097, -1.63, 7.697, 0.33], 'west', kidsDesk);
+  place(g, [7.447, -1.63, 7.697, 0.33], 'west', wallShelves);
+  place(g, [6.55, -0.2, 7.0, 0.25], 'east', chair);
 
   // 主卧室，北侧为衣帽间（隔断在 layout.js）
   place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
