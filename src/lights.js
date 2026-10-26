@@ -19,7 +19,7 @@ export const FIXTURES = [
   { id: 'floor', name: '沙发落地灯', room: 'living', kind: 'lamp', lamp: 'floor', at: [1.325, 5.125], y: 1.6, power: 2.5 },
   { id: 'kitchen', name: '厨房吸顶灯', room: 'kitchen', kind: 'ceiling', at: center('kitchen'), power: 4 },
   { id: 'bath', name: '卫生间灯', room: 'bath', kind: 'ceiling', at: center('bath'), power: 3 },
-  { id: 'hall', name: '过道灯', room: 'hall', kind: 'ceiling', at: center('hall'), power: 3 },
+  { id: 'hall', name: '过道灯', room: 'hall', kind: 'ceiling', at: [3.2, 1.55], power: 3 },
   { id: 'master', name: '主卧主灯', room: 'master', kind: 'ceiling', at: [6.2, 3.9], power: 5 },
   { id: 'master-bedside', name: '主卧床头灯', room: 'master', kind: 'lamp', lamp: 'masterBedside', at: [7.425, 4.92], y: 0.75, power: 1.5 },
   { id: 'closet', name: '衣帽间灯', room: 'master', kind: 'ceiling', at: [6.6, 2.2], power: 2 },
