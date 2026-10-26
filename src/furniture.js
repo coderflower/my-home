@@ -488,6 +488,79 @@ function desk(g, w, d) {
   legs(g, w, d, 0.715, 0.08);
 }
 
+// 显示器：底座 + 立杆 + 屏幕，y0 为桌面高度，屏幕朝 +z
+function monitor(y0) {
+  return (g, w) => {
+    g.add(box(0.22, 0.012, 0.16, M.black, 0, y0, -0.02));
+    g.add(box(0.03, 0.2, 0.02, M.black, 0, y0, -0.06));
+    g.add(box(w, w * 0.58, 0.025, M.black, 0, y0 + 0.12, -0.04));
+    g.add(box(w - 0.02, w * 0.58 - 0.02, 0.005, M.screen, 0, y0 + 0.13, -0.025));
+  };
+}
+
+// 一排竖放的书，颜色轮换
+function books(g, x0, x1, y, z, depth = 0.18) {
+  const colors = [M.mustard, M.sage, M.cream, M.sofa, M.walnut];
+  let x = x0;
+  for (let i = 0; x < x1 - 0.03; i++) {
+    const t = 0.025 + (i % 3) * 0.008;
+    g.add(box(t, 0.18 + (i % 4) * 0.025, depth, colors[i % colors.length], x + t / 2, y, z));
+    x += t + 0.004;
+  }
+}
+
+// 墙面开放搁板：三层木板，每层摆一段书
+function wallShelves(g, w, d) {
+  for (const [i, y] of [1.3, 1.6, 1.9].entries()) {
+    g.add(box(w, 0.025, d, M.walnut, 0, y));
+    books(g, -w / 2 + 0.05 + (i % 2) * 0.2, w / 2 - 0.25 + (i % 2) * 0.2, y + 0.025, 0, d * 0.7);
+  }
+}
+
+// 窗前通长悬浮书桌：东侧桌下两层抽屉，西侧为工位；work 为工位中心的局部 x
+function longDesk(work) {
+  return (g, w, d) => {
+    g.add(box(w, 0.04, d, M.walnut, 0, 0.72));
+    g.add(box(w, 0.06, 0.02, M.walnut, 0, 0.66, d / 2 - 0.01));
+    const x1 = -w / 2 + 0.9;
+    for (const y of [0.3, 0.48]) cabinetDoors(g, -w / 2, x1, y, 0.17, d - 0.02, 0.45, M.cabinet, y + 0.12);
+    g.add(box(0.9, 0.04, d - 0.04, M.walnut, -w / 2 + 0.45, 0.26, -0.02));
+    const screen = new THREE.Group();
+    screen.position.set(work, 0, -d / 2 + 0.2);
+    monitor(0.76)(screen, 0.6);
+    g.add(screen);
+    g.add(box(0.42, 0.015, 0.14, M.black, work, 0.76, 0.08));
+    g.add(cyl(0.07, 0.06, 0.12, M.pot, -w / 2 + 0.2, 0.76, -d / 2 + 0.15));
+    g.add(sphere(0.12, M.green, -w / 2 + 0.2, 1.0, -d / 2 + 0.15));
+    books(g, -w / 2 + 0.4, -w / 2 + 0.7, 0.76, -d / 2 + 0.12, 0.16);
+  };
+}
+
+// 抬高窗台：0.45 米高木台 + 坐垫靠枕，台下抽屉
+function windowSeat(g, w, d) {
+  cabinetDoors(g, -w / 2, w / 2, 0.06, 0.37, d - 0.02, 0.5, M.cabinet, 0.3);
+  g.add(box(w, 0.06, d - 0.06, M.black, 0, 0, -0.03));
+  g.add(box(w, 0.03, d, M.walnut, 0, 0.43));
+  g.add(box(w - 0.06, 0.07, d - 0.06, M.linen, 0, 0.46));
+  for (const [x, m] of [[-w / 2 + 0.25, M.mustard], [w / 2 - 0.25, M.pillow]]) {
+    const pillow = box(0.38, 0.32, 0.12, m, x, 0.52, -d / 2 + 0.1);
+    pillow.rotation.x = -0.2;
+    g.add(pillow);
+  }
+}
+
+// 与窗台相接的书桌：靠窗台一侧落地侧板支撑，另一端入墙
+function seatDesk(g, w, d) {
+  g.add(box(w, 0.04, d, M.walnut, 0, 0.72));
+  g.add(box(0.04, 0.72, d, M.walnut, -w / 2 + 0.02, 0));
+  g.add(box(w - 0.04, 0.12, 0.02, M.walnut, 0.02, 0.6, -d / 2 + 0.01));
+  const screen = new THREE.Group();
+  screen.position.set(0.05, 0, -d / 2 + 0.2);
+  monitor(0.76)(screen, 0.6);
+  g.add(screen);
+  g.add(box(0.42, 0.015, 0.14, M.black, 0.05, 0.76, 0.06));
+}
+
 function shower(g, w, d) {
   g.add(box(w, 2.0, 0.02, M.glass, 0, 0.02, d / 2));
   g.add(cyl(0.12, 0.12, 0.02, M.brass, 0, 2.05, 0));
@@ -505,7 +578,35 @@ function rug(parent, [x1, z1, x2, z2]) {
   parent.add(mesh);
 }
 
-export function buildFurniture(styleId) {
+// 主卧南侧内凹（宽 2.1 米、深 0.8 米的落地窗）的书桌方案
+export const BAY_PLANS = [
+  { id: 'none', name: '不做' },
+  { id: 'long', name: '通长书桌' },
+  { id: 'side', name: '侧墙书桌' },
+  { id: 'seat', name: '窗台+书桌' },
+];
+
+function masterBay(g, plan) {
+  if (plan === 'long') {
+    place(g, [5.197, 5.37, 7.297, 5.92], 'north', longDesk(0.6));
+    place(g, [5.197, 5.12, 5.447, 5.92], 'east', wallShelves);
+    place(g, [7.047, 5.12, 7.297, 5.92], 'west', wallShelves);
+    place(g, [5.42, 4.86, 5.87, 5.31], 'south', chair);
+  } else if (plan === 'side') {
+    place(g, [5.197, 4.72, 5.797, 5.92], 'east', desk);
+    place(g, [5.197, 5.12, 5.547, 5.92], 'east', wallCabinet(1.5, 0.7));
+    place(g, [5.217, 5.02, 5.517, 5.62], 'east', monitor(0.75));
+    place(g, [5.85, 5.1, 6.3, 5.55], 'west', chair);
+    place(g, [6.45, 5.2, 7.15, 5.85], 'north', lounge);
+  } else if (plan === 'seat') {
+    place(g, [6.297, 5.12, 7.297, 5.92], 'north', windowSeat);
+    place(g, [5.197, 5.32, 6.297, 5.92], 'north', seatDesk);
+    place(g, [5.197, 5.12, 5.447, 5.92], 'east', wallShelves);
+    place(g, [5.5, 4.86, 5.95, 5.31], 'south', chair);
+  }
+}
+
+export function buildFurniture(styleId, bayPlan = 'side') {
   applyStyle(styleId);
   const g = new THREE.Group();
 
@@ -563,6 +664,7 @@ export function buildFurniture(styleId) {
   place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', tableLamp(0.52, lampMaterials.masterBedside));
+  masterBay(g, bayPlan);
 
   // 次卧
   place(g, [2.9, 2.22, 4.59, 2.82], 'south', wardrobe());
