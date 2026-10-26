@@ -329,11 +329,13 @@ export function buildFurniture() {
   place(g, [2.95, -0.73, 3.4, -0.24], 'south', toilet);
   place(g, [3.797, -0.73, 4.797, -0.23], 'south', vanity);
 
-  // 儿童房
+  // 儿童房：东墙床尾柜接书桌，书桌上方吊柜
   place(g, [4.9, -1.63, 6.9, -0.43], 'east', bed(M.kidDuvet));
   place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
-  place(g, [7.15, -0.5, 7.67, 0.7], 'west', desk);
-  place(g, [6.65, -0.1, 7.1, 0.35], 'east', chair);
+  place(g, [7.197, -1.63, 7.697, -0.43], 'west', wardrobe(2.4));
+  place(g, [7.197, -0.43, 7.697, 0.92], 'west', desk);
+  place(g, [7.347, -0.43, 7.697, 0.92], 'west', wallCabinet(1.85, 0.55));
+  place(g, [6.7, 0.0, 7.15, 0.45], 'east', chair);
 
   // 主卧室，北侧为衣帽间（隔断在 layout.js）
   place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
