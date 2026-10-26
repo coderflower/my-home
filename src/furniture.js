@@ -157,7 +157,12 @@ function upperCabinet(g, w, d) {
 
 function fridge(g, w, d) {
   g.add(box(w, 1.85, d, M.metal));
-  g.add(box(0.02, 0.5, 0.03, M.black, w / 2 - 0.08, 1.1, d / 2 + 0.01));
+  if (w < 0.8) {
+    g.add(box(0.02, 0.5, 0.03, M.black, w / 2 - 0.08, 1.1, d / 2 + 0.01));
+    return;
+  }
+  g.add(box(0.006, 1.85, 0.01, M.black, 0, 0, d / 2 + 0.003));
+  for (const x of [-0.04, 0.04]) g.add(box(0.02, 0.5, 0.03, M.black, x, 1.1, d / 2 + 0.01));
 }
 
 function toilet(g) {
@@ -242,9 +247,8 @@ export function buildFurniture() {
   place(g, [-1.803, -3.05, -1.482, -2.08], 'east', wardrobe(2.2));
 
   // 厨房：北墙灶台、东墙水槽
-  place(g, [0, -3.6, 0.7, -2.93], 'south', fridge);
-  place(g, [0.7, -3.63, 1.672, -3.03], 'south', counter);
-  place(g, [0.7, -3.63, 1.672, -3.28], 'south', upperCabinet);
+  place(g, [0, -3.63, 1.672, -3.03], 'south', counter);
+  place(g, [0, -3.63, 1.672, -3.28], 'south', upperCabinet);
   place(g, [0.95, -3.58, 1.5, -3.08], 'south', (gg, w, d) => {
     gg.add(box(w, 0.012, d, M.black, 0, 0.94));
     gg.add(box(w + 0.1, 0.4, d, M.metal, 0, 1.6, -0.02));
@@ -252,7 +256,8 @@ export function buildFurniture() {
   place(g, [1.597, -3.175, 2.197, -0.93], 'west', counter);
   place(g, [1.68, -2.5, 2.13, -1.95], 'west', (gg, w, d) => gg.add(box(w, 0.012, d, M.metal, 0, 0.94)));
 
-  // 餐厅
+  // 餐厅，冰箱放在西墙凹槽里
+  place(g, [-2.153, -0.48, -1.453, 0.42], 'east', fridge);
   place(g, [-0.6, 0.15, 1.0, 0.95], 'south', table(0.75, M.wood));
   for (const x of [-0.3, 0.25]) {
     place(g, [x, -0.3, x + 0.45, 0.12], 'south', chair);
@@ -300,7 +305,7 @@ export function buildFurniture() {
   // 阳台
   place(g, [3.897, 5.32, 4.497, 5.94], 'west', washerDryer);
   place(g, [3.897, 5.97, 4.497, 6.6], 'west', laundrySink);
-  place(g, [4.147, 5.32, 4.497, 6.6], 'west', wallCabinet(1.8, 0.62));
+  place(g, [3.897, 5.32, 4.497, 6.6], 'west', wallCabinet(1.8, 0.62));
   place(g, [1.82, 6.22, 2.17, 6.57], 'south', plant);
   place(g, [2.0, 5.9, 3.8, 5.95], 'south', (gg, w) => gg.add(box(w, 0.03, 0.03, M.metal, 0, 2.4)));
 
