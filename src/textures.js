@@ -32,7 +32,7 @@ export function woodTexture() {
       for (let k = -1; k < 2; k++) {
         const x0 = offset + k * size;
         const tone = 0.88 + rand() * 0.18;
-        ctx.fillStyle = `rgb(${Math.round(176 * tone)}, ${Math.round(134 * tone)}, ${Math.round(96 * tone)})`;
+        ctx.fillStyle = `rgb(${Math.round(188 * tone)}, ${Math.round(150 * tone)}, ${Math.round(104 * tone)})`;
         ctx.fillRect(x0, r * rowH, size, rowH);
         for (let g = 0; g < 14; g++) {
           const y = r * rowH + rand() * rowH;

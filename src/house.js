@@ -37,6 +37,7 @@ function buildFloors(group) {
   const mats = {
     wood: new THREE.MeshStandardMaterial({ map: woodTexture(), roughness: 0.55 }),
     tile: new THREE.MeshStandardMaterial({ map: tileTexture([226, 224, 218], '#b9b5ad', 0.6), roughness: 0.35 }),
+    stone: new THREE.MeshStandardMaterial({ map: tileTexture([214, 206, 186], '#bfb39b', 0.8), roughness: 0.3 }),
     outdoor: new THREE.MeshStandardMaterial({ map: tileTexture([118, 120, 122], '#55585b', 0.4), roughness: 0.8 }),
   };
   const floors = new Map();

@@ -19,14 +19,14 @@ from pathlib import Path
 
 ORIGIN = 37500.0
 
-# VR 里的房间名 → 页面上显示的名称、id、地面材质
+# VR 里的房间名 → 页面上显示的名称、id、地面材质（精装交付，材质与 VR 实景一致）
 # 页面上的房间列表按这里的顺序排列
 ROOMS = {
-    '过道A': ('entry', '玄关', 'wood'),
-    '客厅': ('living', '客餐厅', 'wood'),
+    '过道A': ('entry', '玄关', 'stone'),
+    '客厅': ('living', '客餐厅', 'stone'),
     '厨房': ('kitchen', '厨房', 'tile'),
     '卫生间': ('bath', '卫生间', 'tile'),
-    '过道B': ('hall', '过道', 'wood'),
+    '过道B': ('hall', '过道', 'stone'),
     '卧室B': ('master', '主卧室', 'wood'),
     '卧室C': ('bedroom', '次卧', 'wood'),
     '卧室A': ('kids', '儿童房', 'wood'),

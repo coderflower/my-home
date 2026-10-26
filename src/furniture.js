@@ -206,6 +206,14 @@ function fridge(g, w, d) {
   }
 }
 
+// 窄推拉侧柜：整块门板随内部拉篮一起拉出
+function pullOutCabinet(height) {
+  return (g, w, d) => {
+    g.add(box(w, height, d, M.cabinet));
+    g.add(box(0.025, 0.02, 0.025, M.metal, 0, height - 0.12, d / 2 + 0.01));
+  };
+}
+
 function toilet(g) {
   g.add(box(0.38, 0.36, 0.16, M.ceramic, 0, 0.4, -0.27));
   g.add(cyl(0.17, 0.14, 0.4, M.ceramic, 0, 0, 0.02));
@@ -256,10 +264,6 @@ function wallCabinet(y0, height) {
   };
 }
 
-function acIndoor(g, w) {
-  g.add(box(w, 0.28, 0.2, M.white, 0, 2.3));
-}
-
 function desk(g, w, d) {
   table(0.75, M.wood)(g, w, d);
 }
@@ -299,7 +303,9 @@ export function buildFurniture() {
 
   // 餐厅，冰箱放在西墙凹槽里，旁边接餐边柜
   place(g, [-1.803, 0.72, -1.403, 2.5], 'east', sideboard());
-  place(g, [-2.153, -0.48, -1.453, 0.42], 'east', fridge);
+  place(g, [-2.153, -0.38, -1.473, 0.52], 'east', fridge);
+  place(g, [-2.173, -0.58, -1.473, -0.39], 'east', pullOutCabinet(1.85));
+  place(g, [-2.173, -0.58, -1.473, 0.52], 'east', wallCabinet(1.9, 0.78));
   place(g, [-0.6, 0.15, 1.0, 0.95], 'south', table(0.75, M.wood));
   for (const x of [-0.3, 0.25]) {
     place(g, [x, -0.3, x + 0.45, 0.12], 'south', chair);
@@ -328,20 +334,17 @@ export function buildFurniture() {
   place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
   place(g, [7.15, -0.5, 7.67, 0.7], 'west', desk);
   place(g, [6.65, -0.1, 7.1, 0.35], 'east', chair);
-  place(g, [4.897, -1.2, 5.017, -0.4], 'east', acIndoor);
 
   // 主卧室，北侧为衣帽间（隔断在 layout.js）
   place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
   place(g, [7.147, 2.07, 7.697, 2.78], 'west', wardrobe(2.4));
   place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
-  place(g, [4.697, 3.1, 4.817, 3.9], 'east', acIndoor);
 
   // 次卧
   place(g, [2.9, 2.22, 4.59, 2.82], 'south', wardrobe());
   place(g, [2.55, 3.15, 4.59, 4.7], 'west', bed(M.duvet));
   place(g, [4.15, 4.72, 4.59, 5.1], 'west', nightstand);
-  place(g, [1.797, 3.2, 1.917, 4.0], 'east', acIndoor);
 
   // 阳台
   place(g, [3.897, 5.32, 4.497, 5.94], 'west', washerDryer);
