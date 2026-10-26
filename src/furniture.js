@@ -593,11 +593,11 @@ function masterBay(g, plan) {
     place(g, [7.047, 5.12, 7.297, 5.92], 'west', wallShelves);
     place(g, [5.42, 4.86, 5.87, 5.31], 'south', chair);
   } else if (plan === 'side') {
-    place(g, [5.197, 4.72, 5.797, 5.92], 'east', desk);
-    place(g, [5.197, 5.12, 5.547, 5.92], 'east', wallCabinet(1.5, 0.7));
-    place(g, [5.217, 5.02, 5.517, 5.62], 'east', monitor(0.75));
-    place(g, [5.85, 5.1, 6.3, 5.55], 'west', chair);
-    place(g, [6.45, 5.2, 7.15, 5.85], 'north', lounge);
+    place(g, [6.697, 5.12, 7.297, 5.92], 'west', desk);
+    place(g, [6.947, 5.12, 7.297, 5.92], 'west', wallCabinet(1.5, 0.7));
+    place(g, [6.977, 5.22, 7.277, 5.82], 'west', monitor(0.75));
+    place(g, [6.2, 5.3, 6.65, 5.75], 'east', chair);
+    place(g, [5.25, 5.55, 5.55, 5.85], 'south', plant);
   } else if (plan === 'seat') {
     place(g, [6.297, 5.12, 7.297, 5.92], 'north', windowSeat);
     place(g, [5.197, 5.32, 6.297, 5.92], 'north', seatDesk);
