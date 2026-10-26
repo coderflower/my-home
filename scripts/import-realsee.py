@@ -113,9 +113,6 @@ def main(src, out):
                 balcony = next((x for x in (plus, minus) if x and x['id'] == 'balcony'), None)
                 if balcony and private:
                     o.update(type='door', head=r(head), sliding=True)
-                elif balcony and width <= 1.0:
-                    o.update(type='door', head=r(head),
-                             leaf={'hinge': 'start', 'swing': 1 if balcony is plus else -1})
                 elif private and width <= 1.0:
                     o.update(type='door', head=r(head),
                              leaf={'hinge': 'start', 'swing': 1 if private is plus else -1})

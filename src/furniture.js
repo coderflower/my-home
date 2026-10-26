@@ -181,6 +181,35 @@ function washer(g, w, d) {
   g.add(door);
 }
 
+// 洗衣机在下、烘干机叠放在上
+function washerDryer(g, w, d) {
+  washer(g, w, d);
+  const dryer = new THREE.Group();
+  dryer.position.y = 0.87;
+  washer(dryer, w, d);
+  g.add(dryer);
+}
+
+function laundrySink(g, w, d) {
+  g.add(box(w, 0.8, d, M.cabinet));
+  g.add(box(w, 0.04, d, M.counter, 0, 0.8));
+  g.add(box(w - 0.14, 0.02, d - 0.2, M.metal, 0, 0.83, 0.02));
+  g.add(cyl(0.015, 0.015, 0.3, M.metal, 0, 0.84, -d / 2 + 0.06, 8));
+  g.add(box(0.03, 0.03, 0.18, M.metal, 0, 1.11, -d / 2 + 0.14));
+}
+
+function wallCabinet(y0, height) {
+  return (g, w, d) => {
+    const n = Math.max(2, Math.round(w / 0.45));
+    const dw = w / n;
+    for (let i = 0; i < n; i++) {
+      const x = -w / 2 + dw * (i + 0.5);
+      g.add(box(dw - 0.008, height, d, M.cabinet, x, y0));
+      g.add(box(0.12, 0.02, 0.025, M.metal, x, y0 + 0.06, d / 2 + 0.01));
+    }
+  };
+}
+
 function acIndoor(g, w) {
   g.add(box(w, 0.28, 0.2, M.white, 0, 2.3));
 }
@@ -269,8 +298,9 @@ export function buildFurniture() {
   place(g, [1.71, 3.2, 1.83, 4.0], 'east', acIndoor);
 
   // 阳台
-  place(g, [4.05, 5.3, 4.6, 6.7], 'west', wardrobe(2.2));
-  place(g, [3.35, 6.1, 3.95, 6.7], 'north', washer);
+  place(g, [4.0, 5.25, 4.6, 5.87], 'west', washerDryer);
+  place(g, [4.0, 5.92, 4.6, 6.7], 'west', laundrySink);
+  place(g, [4.25, 5.25, 4.6, 6.7], 'west', wallCabinet(1.8, 0.62));
   place(g, [1.75, 6.3, 2.1, 6.65], 'south', plant);
   place(g, [2.0, 5.9, 3.8, 5.95], 'south', (gg, w) => gg.add(box(w, 0.03, 0.03, M.metal, 0, 2.4)));
 
