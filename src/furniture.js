@@ -239,18 +239,18 @@ export function buildFurniture() {
   const g = new THREE.Group();
 
   // 玄关
-  place(g, [-1.853, -2.95, -1.5, -2.05], 'east', wardrobe(2.2));
+  place(g, [-1.803, -3.05, -1.482, -2.08], 'east', wardrobe(2.2));
 
   // 厨房：北墙灶台、东墙水槽
-  place(g, [-0.03, -3.62, 0.67, -2.95], 'south', fridge);
-  place(g, [0.67, -3.65, 1.672, -3.05], 'south', counter);
-  place(g, [0.67, -3.65, 1.672, -3.3], 'south', upperCabinet);
-  place(g, [0.95, -3.6, 1.5, -3.1], 'south', (gg, w, d) => {
+  place(g, [0, -3.6, 0.7, -2.93], 'south', fridge);
+  place(g, [0.7, -3.63, 1.672, -3.03], 'south', counter);
+  place(g, [0.7, -3.63, 1.672, -3.28], 'south', upperCabinet);
+  place(g, [0.95, -3.58, 1.5, -3.08], 'south', (gg, w, d) => {
     gg.add(box(w, 0.012, d, M.black, 0, 0.94));
     gg.add(box(w + 0.1, 0.4, d, M.metal, 0, 1.6, -0.02));
   });
-  place(g, [1.667, -3.175, 2.267, -0.84], 'west', counter);
-  place(g, [1.75, -2.5, 2.2, -1.95], 'west', (gg, w, d) => gg.add(box(w, 0.012, d, M.metal, 0, 0.94)));
+  place(g, [1.597, -3.175, 2.197, -0.93], 'west', counter);
+  place(g, [1.68, -2.5, 2.13, -1.95], 'west', (gg, w, d) => gg.add(box(w, 0.012, d, M.metal, 0, 0.94)));
 
   // 餐厅
   place(g, [-0.6, 0.15, 1.0, 0.95], 'south', table(0.75, M.wood));
@@ -261,8 +261,8 @@ export function buildFurniture() {
 
   // 客厅
   rug(g, [-1.2, 2.7, 0.6, 4.9]);
-  place(g, [0.8, 2.7, 1.65, 4.9], 'west', sofa);
-  place(g, [-1.873, 2.85, -1.45, 4.75], 'east', tvWall);
+  place(g, [0.75, 2.7, 1.597, 4.9], 'west', sofa);
+  place(g, [-1.803, 2.85, -1.38, 4.75], 'east', tvWall);
   place(g, [-0.6, 3.5, 0.0, 4.1], 'south', (gg) => {
     gg.add(cyl(0.3, 0.3, 0.04, M.white, 0, 0.38));
     gg.add(cyl(0.04, 0.12, 0.38, M.white));
@@ -270,38 +270,38 @@ export function buildFurniture() {
   const armchair = place(g, [-1.0, 5.1, -0.3, 5.75], 'north', lounge);
   armchair.rotation.y = Math.PI * 0.8;
   place(g, [1.2, 5.0, 1.45, 5.25], 'south', floorLamp);
-  place(g, [-1.8, 5.75, -1.5, 6.1], 'south', plant);
+  place(g, [-1.78, 5.65, -1.48, 6.0], 'south', plant);
 
   // 卫生间与过道洗手台
-  place(g, [1.72, -0.78, 2.55, 0.93], 'east', shower);
-  place(g, [2.95, -0.79, 3.4, -0.3], 'south', toilet);
-  place(g, [3.8, -0.8, 4.8, -0.3], 'south', vanity);
+  place(g, [1.797, -0.73, 2.597, 0.87], 'east', shower);
+  place(g, [2.95, -0.73, 3.4, -0.24], 'south', toilet);
+  place(g, [3.797, -0.73, 4.797, -0.23], 'south', vanity);
 
   // 儿童房
-  place(g, [4.9, -1.65, 6.9, -0.45], 'east', bed(M.kidDuvet));
-  place(g, [6.1, 0.97, 7.77, 1.47], 'north', wardrobe());
-  place(g, [7.25, -0.5, 7.77, 0.7], 'west', desk);
-  place(g, [6.75, -0.1, 7.2, 0.35], 'east', chair);
-  place(g, [4.86, -1.2, 4.98, -0.4], 'east', acIndoor);
+  place(g, [4.9, -1.63, 6.9, -0.43], 'east', bed(M.kidDuvet));
+  place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
+  place(g, [7.15, -0.5, 7.67, 0.7], 'west', desk);
+  place(g, [6.65, -0.1, 7.1, 0.35], 'east', chair);
+  place(g, [4.897, -1.2, 5.017, -0.4], 'east', acIndoor);
 
   // 主卧室
-  place(g, [6.1, 1.5, 7.77, 2.1], 'south', wardrobe());
-  place(g, [5.75, 2.6, 7.77, 4.4], 'west', bed(M.duvet));
-  place(g, [7.3, 2.15, 7.75, 2.55], 'west', nightstand);
-  place(g, [7.3, 4.45, 7.75, 4.85], 'west', nightstand);
-  place(g, [4.63, 3.1, 4.75, 3.9], 'east', acIndoor);
+  place(g, [6.1, 1.52, 7.67, 2.12], 'south', wardrobe());
+  place(g, [5.65, 2.6, 7.67, 4.4], 'west', bed(M.duvet));
+  place(g, [7.2, 2.15, 7.65, 2.55], 'west', nightstand);
+  place(g, [7.2, 4.45, 7.65, 4.85], 'west', nightstand);
+  place(g, [4.697, 3.1, 4.817, 3.9], 'east', acIndoor);
 
   // 次卧
-  place(g, [2.9, 2.18, 4.59, 2.78], 'south', wardrobe());
+  place(g, [2.9, 2.22, 4.59, 2.82], 'south', wardrobe());
   place(g, [2.55, 3.15, 4.59, 4.7], 'west', bed(M.duvet));
   place(g, [4.15, 4.72, 4.59, 5.1], 'west', nightstand);
-  place(g, [1.71, 3.2, 1.83, 4.0], 'east', acIndoor);
+  place(g, [1.797, 3.2, 1.917, 4.0], 'east', acIndoor);
 
   // 阳台
-  place(g, [4.0, 5.25, 4.6, 5.87], 'west', washerDryer);
-  place(g, [4.0, 5.92, 4.6, 6.7], 'west', laundrySink);
-  place(g, [4.25, 5.25, 4.6, 6.7], 'west', wallCabinet(1.8, 0.62));
-  place(g, [1.75, 6.3, 2.1, 6.65], 'south', plant);
+  place(g, [3.897, 5.32, 4.497, 5.94], 'west', washerDryer);
+  place(g, [3.897, 5.97, 4.497, 6.6], 'west', laundrySink);
+  place(g, [4.147, 5.32, 4.497, 6.6], 'west', wallCabinet(1.8, 0.62));
+  place(g, [1.82, 6.22, 2.17, 6.57], 'south', plant);
   place(g, [2.0, 5.9, 3.8, 5.95], 'south', (gg, w) => gg.add(box(w, 0.03, 0.03, M.metal, 0, 2.4)));
 
   return g;

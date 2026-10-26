@@ -2,7 +2,7 @@
 
 可交互的三维户型，Three.js + Vite 纯前端，部署在 GitHub Pages：<https://coderflower.github.io/my-home/>
 
-户型取自贝壳（如视）VR 的实测数据：9 个房间、52 段墙、17 处门窗洞口，套内净面积 75.6 m²。家具为示意摆放。
+户型取自贝壳（如视）VR 的实测数据：9 个房间、52 段墙、17 处门窗洞口，墙体位置和厚度按开发商 CAD 户型图校正，套内净面积 73.4 m²。家具为示意摆放。
 
 ## 本地运行
 
@@ -48,6 +48,20 @@ npm test
 - 墙体取 `edgeWall` 的厚度多边形，投影到墙中线方向得到带转角延伸的矩形，外墙沿内侧线向外加厚。
 - 门窗取各墙的 `holes`：外墙洞口是窗，靠近 `entrance` 的那个是入户门；内墙洞口按两侧房间判断，卧室和卫生间的门装门扇，卧室通阳台的做推拉门，其余做开敞洞口。
 - 房间名称、id、地面材质和列表顺序在脚本顶部的 `ROOMS` 里改。
+- 有 `vr/cad-walls.json` 时按 CAD 校正：每段墙两侧墙面吸附到最近的一对 CAD 墙线（墙厚随之改为 CAD 的），墙端点和房间轮廓跟着相邻墙面走，门窗洞口保持宽度。
+
+### CAD 墙线
+
+`vr/cad-walls.json` 从 CAD 户型图提取，换 CAD 时重新生成：
+
+```bash
+brew install libredwg && pip install ezdxf
+dwg2dxf -y -o vr/raw/plan.dxf <户型.dwg>
+python3 scripts/extract-cad.py vr/raw/plan.dxf
+python3 scripts/import-realsee.py vr/raw/floorplan.json
+```
+
+`extract-cad.py` 顶部的 `PLAN_BLOCK` 是原始结构平面图所在的图块，`CAD_ORIGIN` / `VR_ORIGIN` 用轴⑨、轴 C 把 CAD 坐标对齐到 VR 坐标。家具坐标是手写的，墙体变动后要在 `src/furniture.js` 里跟着调整。
 
 ## 代码
 
