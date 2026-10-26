@@ -43,6 +43,16 @@ ADDED_WALLS = [
     {'a': [5.997, 2.83], 'b': [7.697, 2.83], 't': 0.1, 'height': 2.7, 'exterior': False,
      'openings': [{'from': 0.45, 'to': 1.35, 'type': 'window', 'sill': 0.9, 'head': 2.1}]},
 ]
+# 校正后仍与实际不符的墙，按校正后的端点 (a, b) 匹配：值为要改的字段，None 表示不建
+WALL_FIXES = {
+    # 客厅通过道、通阳台的两段垭口墙与餐桌后的卫生间墙面对齐
+    ((1.637, 0.92), (1.637, 2.17)): {'a': [1.697, 0.92], 'b': [1.697, 2.17], 't': 0.2},
+    ((1.637, 6.165), (1.637, 5.17)): {'a': [1.697, 6.165], 'b': [1.697, 5.17], 't': 0.2},
+    # 客厅窗与阳台之间是一个实心墙垛，VR 拆成了三段薄墙
+    ((1.457, 6.855), (1.457, 6.165)): {'a': [1.5975, 6.165], 'b': [1.5975, 6.855], 't': 0.401},
+    ((1.397, 6.225), (1.798, 6.225)): None,
+    ((1.738, 6.165), (1.738, 6.82)): None,
+}
 CAD_WALLS = Path(__file__).resolve().parent.parent / 'vr' / 'cad-walls.json'
 
 
@@ -254,6 +264,16 @@ def main(src, out):
             cal.wall(w)
         for room in rooms:
             cal.room(room)
+
+    fixed = []
+    for w in walls:
+        key = (tuple(w['a']), tuple(w['b']))
+        if key in WALL_FIXES:
+            if WALL_FIXES[key] is None:
+                continue
+            w.update(WALL_FIXES[key])
+        fixed.append(w)
+    walls = fixed
 
     walls.extend(ADDED_WALLS)
     height = max(w['height'] for w in walls)
