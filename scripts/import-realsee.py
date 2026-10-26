@@ -164,12 +164,7 @@ class Calibration:
             nx = self.coord('x', x, *zs) if zs[1] - zs[0] > 1e-3 else self.point(x, z)[0]
             nz = self.coord('z', z, *xs) if xs[1] - xs[0] > 1e-3 else self.point(x, z)[1]
             out.append([r(nx), r(nz)])
-        room['area'] = round(room['area'] * polygon_area(out) / polygon_area(poly), 2)
         room['poly'] = out
-
-
-def polygon_area(poly):
-    return abs(sum(x1 * z2 - x2 * z1 for (x1, z1), (x2, z2) in zip(poly, poly[1:] + poly[:1]))) / 2
 
 
 def main(src, out):
