@@ -4,7 +4,8 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 import { rooms } from './layout.js';
 import { roomCenter, roomBounds } from './geometry.js';
 import { buildHouse, setHouseColors } from './house.js';
-import { buildFurniture, screenMaterial, sharedMaterials, STYLES } from './furniture.js';
+import { buildFurniture, screenMaterial, sharedMaterials, lampMaterials, STYLES } from './furniture.js';
+import { buildLights, FIXTURES, SCENES } from './lights.js';
 import './style.css';
 
 const STORAGE_KEY = 'my-home:settings';
@@ -13,9 +14,14 @@ const LOW_CUT = 1.05;
 const PLAN_IMAGE = { src: 'floorplan.png', pxPerMeter: 44, origin: [384, 511] };
 
 const settings = Object.assign(
-  { wallMode: 'auto', night: false, labels: true, plan: false, lights: {}, style: STYLES[0].id },
+  { wallMode: 'auto', night: false, labels: true, plan: false, style: STYLES[0].id, brightness: 80, temperature: 3500 },
   loadSettings(),
 );
+// 旧版按房间记录灯光，换成按灯具记录后重置为「回家」场景
+if (settings.lightsVersion !== 2) {
+  settings.lights = Object.fromEntries(SCENES.home.on.map((id) => [id, true]));
+  settings.lightsVersion = 2;
+}
 
 function loadSettings() {
   try {
@@ -110,15 +116,8 @@ scene.add(sun, sun.target);
 
 // ---------- 灯光 ----------
 
-const roomLights = new Map();
-for (const room of rooms) {
-  if (room.floor === 'outdoor' && room.id !== 'balcony') continue;
-  const [x, z] = roomCenter(room);
-  const light = new THREE.PointLight(0xffd9a8, 0, 7, 2);
-  light.position.set(x, 2.45, z);
-  scene.add(light);
-  roomLights.set(room.id, light);
-}
+const lights = buildLights(scene);
+const lampFixture = new Map(FIXTURES.filter((f) => f.lamp).map((f) => [lampMaterials[f.lamp], f.id]));
 
 function applyLighting() {
   const night = settings.night;
@@ -127,10 +126,32 @@ function applyLighting() {
   sun.intensity = night ? 0.18 : 2.6;
   sun.color.set(night ? 0x9fb4d9 : 0xfff2de);
   ground.material.color.set(night ? 0x2a2f38 : 0xd8d4cc);
-  for (const [id, light] of roomLights) {
-    light.intensity = night && settings.lights[id] !== false ? 5 : 0;
-  }
+  lights.apply({
+    states: settings.lights,
+    night,
+    brightness: settings.brightness,
+    temperature: settings.temperature,
+    lowWalls: settings.wallMode === 'low',
+  });
   screenMaterial.emissive.set(night ? 0x1b2a44 : 0x000000);
+}
+
+function setLight(id, on) {
+  settings.lights[id] = on;
+  saveSettings();
+  applyLighting();
+  syncUi();
+}
+
+function applyScene(key) {
+  const sceneDef = SCENES[key];
+  settings.lights = Object.fromEntries(FIXTURES.map((f) => [f.id, sceneDef.on.includes(f.id)]));
+  if (sceneDef.brightness) settings.brightness = sceneDef.brightness;
+  if (sceneDef.temperature) settings.temperature = sceneDef.temperature;
+  if (sceneDef.night) settings.night = true;
+  saveSettings();
+  applyLighting();
+  syncUi();
 }
 
 // ---------- 户型图对照 ----------
@@ -294,9 +315,14 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
   pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
   raycaster.setFromCamera(pointer, camera);
-  const hit = raycaster.intersectObjects([...leaves, ...floorMeshes], false)[0];
+  const lamps = [];
+  furniture.traverse((obj) => obj.isMesh && lampFixture.has(obj.material) && lamps.push(obj));
+  const hit = raycaster.intersectObjects([...leaves, ...lights.meshes, ...lamps, ...floorMeshes], false)[0];
   if (!hit) return;
-  if (hit.object.userData.door) {
+  const fixture = hit.object.userData.fixture ?? lampFixture.get(hit.object.material);
+  if (fixture) {
+    setLight(fixture, !settings.lights[fixture]);
+  } else if (hit.object.userData.door) {
     const door = hit.object.userData.door;
     door.open = !door.open;
   } else if (hit.object.userData.room) {
@@ -321,16 +347,18 @@ for (const room of rooms) {
     document.body.classList.remove('panel-open');
   });
   li.appendChild(btn);
-  if (roomLights.has(room.id)) {
+  const roomFixtures = FIXTURES.filter((f) => f.room === room.id);
+  if (roomFixtures.length) {
     const lightBtn = document.createElement('button');
     lightBtn.className = 'light-btn';
     lightBtn.title = `${room.name}灯光`;
     lightBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>';
     lightBtn.addEventListener('click', () => {
-      settings.lights[room.id] = settings.lights[room.id] === false;
+      const on = !roomFixtures.some((f) => settings.lights[f.id]);
+      for (const f of roomFixtures) settings.lights[f.id] = on;
       saveSettings();
-      syncUi();
       applyLighting();
+      syncUi();
     });
     li.appendChild(lightBtn);
   }
@@ -349,9 +377,42 @@ const buttons = {
   labels: document.getElementById('btn-labels'),
   plan: document.getElementById('btn-plan'),
   panel: document.getElementById('btn-panel'),
+  lights: document.getElementById('btn-lights'),
 };
 const wallButtons = document.querySelectorAll('[data-wall]');
 const styleBar = document.getElementById('style-bar');
+const lightList = document.getElementById('light-list');
+const sceneBar = document.getElementById('scene-bar');
+const brightnessInput = document.getElementById('brightness');
+const temperatureInput = document.getElementById('temperature');
+
+for (const [key, def] of Object.entries(SCENES)) {
+  const btn = document.createElement('button');
+  btn.className = 'text-btn';
+  btn.textContent = def.name;
+  btn.addEventListener('click', () => applyScene(key));
+  sceneBar.appendChild(btn);
+}
+
+for (const f of FIXTURES) {
+  const li = document.createElement('li');
+  li.dataset.fixture = f.id;
+  const room = rooms.find((r) => r.id === f.room);
+  li.innerHTML = `<span>${f.name}<small>${room.name}</small></span><button class="switch" role="switch" aria-label="${f.name}"><i></i></button>`;
+  li.querySelector('button').addEventListener('click', () => setLight(f.id, !settings.lights[f.id]));
+  lightList.appendChild(li);
+}
+
+brightnessInput.value = settings.brightness;
+temperatureInput.value = settings.temperature;
+for (const [input, key] of [[brightnessInput, 'brightness'], [temperatureInput, 'temperature']]) {
+  input.addEventListener('input', () => {
+    settings[key] = Number(input.value);
+    saveSettings();
+    applyLighting();
+    syncUi();
+  });
+}
 
 for (const s of STYLES) {
   const btn = document.createElement('button');
@@ -377,12 +438,23 @@ buttons.reset.addEventListener('click', () => {
 buttons.night.addEventListener('click', () => toggle('night'));
 buttons.labels.addEventListener('click', () => toggle('labels'));
 buttons.plan.addEventListener('click', () => toggle('plan'));
-buttons.panel.addEventListener('click', () => document.body.classList.toggle('panel-open'));
+buttons.panel.addEventListener('click', () => {
+  document.body.classList.toggle('panel-open');
+  if (window.innerWidth <= 720) document.body.classList.remove('lights-open');
+  syncUi();
+});
+buttons.lights.addEventListener('click', () => {
+  document.body.classList.toggle('lights-open');
+  if (window.innerWidth <= 720) document.body.classList.remove('panel-open');
+  syncUi();
+});
+if (window.innerWidth > 720) document.body.classList.add('lights-open');
 for (const btn of wallButtons) {
   btn.addEventListener('click', () => {
     settings.wallMode = btn.dataset.wall;
     saveSettings();
     applyWallMode();
+    applyLighting();
     syncUi();
   });
 }
@@ -401,9 +473,19 @@ function syncUi() {
   for (const btn of wallButtons) btn.classList.toggle('on', btn.dataset.wall === settings.wallMode);
   for (const btn of styleBar.children) btn.classList.toggle('on', btn.dataset.style === settings.style);
   for (const li of roomList.children) {
-    const on = settings.night && settings.lights[li.dataset.room] !== false;
+    const on = FIXTURES.some((f) => f.room === li.dataset.room && settings.lights[f.id]);
     li.querySelector('.light-btn')?.classList.toggle('on', on);
   }
+  for (const li of lightList.children) {
+    const on = !!settings.lights[li.dataset.fixture];
+    li.classList.toggle('on', on);
+    li.querySelector('button').setAttribute('aria-checked', on);
+  }
+  const lit = FIXTURES.filter((f) => settings.lights[f.id]).length;
+  document.getElementById('lit-count').textContent = `${lit} / ${FIXTURES.length} 盏亮着`;
+  brightnessInput.nextElementSibling.textContent = `${settings.brightness}%`;
+  temperatureInput.nextElementSibling.textContent = `${settings.temperature}K`;
+  buttons.lights.classList.toggle('on', document.body.classList.contains('lights-open'));
   document.body.classList.toggle('night', settings.night);
   for (const label of labels) label.visible = settings.labels;
   planMesh.visible = settings.plan;

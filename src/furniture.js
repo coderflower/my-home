@@ -16,7 +16,7 @@ Object.assign(M, {
   screen: new THREE.MeshStandardMaterial({ color: 0x0b0d10, roughness: 0.2, emissive: 0x000000 }),
   ceramic: mat(0xffffff, 0.15),
   green: mat(0x4f7445, 0.9),
-  opal: new THREE.MeshStandardMaterial({ color: 0xfff6e6, roughness: 0.3, emissive: 0x3a2e1c }),
+  opal: new THREE.MeshStandardMaterial({ color: 0xfff6e6, roughness: 0.3 }),
   mirror: mat(0xcfdde3, 0.15, 0.3),
   glass: new THREE.MeshStandardMaterial({ color: 0xcfe6ef, roughness: 0.05, transparent: true, opacity: 0.3, depthWrite: false }),
 });
@@ -96,6 +96,11 @@ export const STYLES = [
     rug: { pattern: 'border', base: '#b9b6b1', colors: ['#c9a86a'], border: '#c9a86a' },
   },
 ];
+
+// 家具上的灯各用一份灯罩材质，lights.js 按开关状态改发光
+export const lampMaterials = Object.fromEntries(
+  ['dining', 'floor', 'masterBedside', 'guestBedside'].map((key) => [key, M.opal.clone()]),
+);
 
 let style = STYLES[0];
 
@@ -345,14 +350,23 @@ function plant(g) {
 function floorLamp(g) {
   g.add(cyl(0.14, 0.15, 0.025, M.brass));
   g.add(cyl(0.01, 0.01, 1.45, M.brass));
-  g.add(sphere(0.16, M.opal, 0, 1.6, 0));
+  g.add(sphere(0.16, lampMaterials.floor, 0, 1.6, 0));
+}
+
+// 床头台灯，y0 为床头柜台面高度
+function tableLamp(y0, material) {
+  return (g) => {
+    g.add(cyl(0.06, 0.07, 0.03, M.brass, 0, y0));
+    g.add(cyl(0.008, 0.008, 0.22, M.brass, 0, y0 + 0.03));
+    g.add(cyl(0.08, 0.12, 0.16, material, 0, y0 + 0.2));
+  };
 }
 
 // 乳白球形吊灯
 function pendant(g) {
   g.add(cyl(0.006, 0.006, 0.8, M.brass, 0, 1.9));
   g.add(cyl(0.05, 0.05, 0.02, M.brass, 0, 2.68));
-  g.add(sphere(0.2, M.opal, 0, 1.75, 0));
+  g.add(sphere(0.2, lampMaterials.dining, 0, 1.75, 0));
 }
 
 function coffeeTable(g, w, d) {
@@ -526,11 +540,13 @@ export function buildFurniture(styleId) {
   place(g, [7.147, 2.07, 7.697, 2.78], 'west', wardrobe(2.4));
   place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
+  place(g, [7.2, 4.72, 7.65, 5.12], 'west', tableLamp(0.52, lampMaterials.masterBedside));
 
   // 次卧
   place(g, [2.9, 2.22, 4.59, 2.82], 'south', wardrobe());
   place(g, [2.55, 3.15, 4.59, 4.7], 'west', bed(M.guestDuvet));
   place(g, [4.15, 4.72, 4.59, 5.1], 'west', nightstand);
+  place(g, [4.15, 4.72, 4.59, 5.1], 'west', tableLamp(0.52, lampMaterials.guestBedside));
 
   // 阳台
   place(g, [3.897, 5.32, 4.497, 5.94], 'west', washerDryer);
@@ -543,5 +559,5 @@ export function buildFurniture(styleId) {
 }
 
 export const screenMaterial = M.screen;
-export const sharedMaterials = new Set(Object.values(M));
+export const sharedMaterials = new Set([...Object.values(M), ...Object.values(lampMaterials)]);
 export const currentStyle = () => style;

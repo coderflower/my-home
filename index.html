@@ -24,7 +24,19 @@
     <aside class="panel">
       <h2>房间</h2>
       <ul id="room-list"></ul>
-      <p class="note">户型取自贝壳 VR 实测数据，尺寸按开发商 CAD 校正，家具为示意。<br />点击门扇可开关门，点击地面可定位房间。</p>
+      <p class="note">户型取自贝壳 VR 实测数据，尺寸按开发商 CAD 校正，家具为示意。<br />点击门扇可开关门，点击灯具可开关灯，点击地面可定位房间。</p>
+    </aside>
+
+    <aside class="light-panel" aria-label="灯光">
+      <div class="lp-head">
+        <h2>灯光</h2>
+        <span id="lit-count"></span>
+      </div>
+      <div id="scene-bar" class="scene-bar"></div>
+      <label class="slider"><span>亮度</span><input id="brightness" type="range" min="10" max="100" step="5" /><output></output></label>
+      <label class="slider"><span>色温</span><input id="temperature" type="range" min="2700" max="6500" step="100" /><output></output></label>
+      <ul id="light-list"></ul>
+      <p class="note">点击场景里的灯具也能开关。切到夜晚看灯光效果更明显。</p>
     </aside>
 
     <nav class="toolbar">
@@ -50,6 +62,9 @@
         </button>
         <button id="btn-labels" class="icon-btn" title="房间名称">
           <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+        </button>
+        <button id="btn-lights" class="icon-btn" title="灯光">
+          <svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
         </button>
         <button id="btn-night" class="icon-btn" title="夜晚">
           <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
