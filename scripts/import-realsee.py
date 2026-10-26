@@ -33,6 +33,8 @@ ROOMS = {
     '阳台': ('balcony', '阳台', 'outdoor'),
 }
 PRIVATE = {'bath', 'kids', 'master', 'bedroom'}
+# 门扇默认铰链在洞口起点一侧，这里按房间改到另一侧
+HINGE_AT_END = {'bedroom'}
 # 装修拆除的内墙：两侧房间为这些组合时整段墙不建
 REMOVED_BETWEEN = [{'entry', 'living'}]
 # 装修新增的墙（VR 和 CAD 里都没有），坐标为校正后的最终坐标
@@ -240,7 +242,8 @@ def main(src, out):
                     o.update(type='door', head=r(head), sliding=True)
                 elif private and width <= 1.0:
                     o.update(type='door', head=r(head),
-                             leaf={'hinge': 'start', 'swing': 1 if private is plus else -1})
+                             leaf={'hinge': 'end' if private['id'] in HINGE_AT_END else 'start',
+                                   'swing': 1 if private is plus else -1})
                 else:
                     o.update(type='opening', head=r(head))
             openings.append(o)

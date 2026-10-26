@@ -61,7 +61,7 @@ export const walls = [
   {"a": [1.637, 6.165], "b": [1.637, 5.17], "t": 0.24, "height": 2.7, "exterior": false, "openings": [{"from": 0.147, "to": 0.912, "type": "opening", "head": 2}]},
   {"a": [1.697, -0.83], "b": [1.697, 0.92], "t": 0.2, "height": 2.7, "exterior": false, "openings": []},
   {"a": [3.797, 0.92], "b": [1.697, 0.92], "t": 0.1, "height": 2.7, "exterior": false, "openings": []},
-  {"a": [4.697, 2.12], "b": [1.597, 2.12], "t": 0.2, "height": 2.7, "exterior": false, "openings": [{"from": 1.887, "to": 2.687, "type": "door", "head": 2, "leaf": {"hinge": "start", "swing": -1}}]},
+  {"a": [4.697, 2.12], "b": [1.597, 2.12], "t": 0.2, "height": 2.7, "exterior": false, "openings": [{"from": 1.887, "to": 2.687, "type": "door", "head": 2, "leaf": {"hinge": "end", "swing": -1}}]},
   {"a": [1.637, 0.92], "b": [1.637, 2.17], "t": 0.24, "height": 2.7, "exterior": false, "openings": [{"from": 0.088, "to": 1.163, "type": "opening", "head": 2}]},
   {"a": [1.697, 5.32], "b": [1.697, 2.02], "t": 0.2, "height": 2.7, "exterior": false, "openings": []},
   {"a": [4.697, 5.22], "b": [1.597, 5.22], "t": 0.2, "height": 2.7, "exterior": false, "openings": [{"from": 0.881, "to": 2.706, "type": "door", "head": 2, "sliding": true}]},
