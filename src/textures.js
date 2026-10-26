@@ -77,6 +77,25 @@ export function tileTexture(base, grout, meters) {
   }, meters);
 }
 
+// 洞洞板：每格 20 cm、8×8 个孔，孔距 25 mm
+export function pegboardTexture(width, height) {
+  const texture = canvasTexture(256, (ctx, size) => {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = 'rgba(40, 32, 24, 0.75)';
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        ctx.beginPath();
+        ctx.arc(((i + 0.5) * size) / n, ((j + 0.5) * size) / n, size / 64, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }, 0.2);
+  texture.repeat.set(width / 0.2, height / 0.2);
+  return texture;
+}
+
 // 地毯：spec.pattern 为 geo 几何半圆圆点 / stripe 条纹 / border 回字边框 / plain 素色带包边
 export function rugTexture(spec) {
   const { pattern, base, colors, border } = spec;

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { rugTexture } from './textures.js';
+import { rugTexture, pegboardTexture } from './textures.js';
 
 const mat = (color, roughness = 0.7, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
 
@@ -411,6 +411,27 @@ function pullOutCabinet(height) {
   };
 }
 
+// 洞洞板：板面颜色随风格取柜门浅色，挂一块搁板、几只挂钩、一个帆布包和钥匙
+function pegboard(y0, height) {
+  return (g, w, d) => {
+    const board = new THREE.Mesh(
+      new THREE.BoxGeometry(w, height, d),
+      new THREE.MeshStandardMaterial({ map: pegboardTexture(w, height), color: M.cream.color, roughness: 0.7 }),
+    );
+    board.position.set(0, y0 + height / 2, 0);
+    board.receiveShadow = true;
+    g.add(board);
+    const front = d / 2;
+    g.add(box(0.5, 0.025, 0.16, M.wood, -w / 2 + 0.35, y0 + height - 0.35, front + 0.08));
+    g.add(box(0.14, 0.1, 0.1, M.mustard, -w / 2 + 0.25, y0 + height - 0.325, front + 0.08));
+    g.add(cyl(0.04, 0.035, 0.12, M.pot, -w / 2 + 0.45, y0 + height - 0.325, front + 0.08));
+    for (const x of [0.1, 0.3, 0.5]) g.add(box(0.012, 0.012, 0.08, M.brass, x - w / 2 + 0.2, y0 + 0.55, front + 0.04));
+    g.add(box(0.32, 0.38, 0.06, M.sofa, w / 2 - 0.35, y0 + 0.1, front + 0.04));
+    g.add(box(0.012, 0.012, 0.08, M.brass, w / 2 - 0.35, y0 + 0.55, front + 0.04));
+    g.add(box(0.04, 0.07, 0.01, M.metal, -w / 2 + 0.3, y0 + 0.44, front + 0.08));
+  };
+}
+
 function toilet(g) {
   g.add(box(0.38, 0.36, 0.16, M.ceramic, 0, 0.4, -0.27));
   g.add(cyl(0.17, 0.14, 0.4, M.ceramic, 0, 0, 0.02));
@@ -490,6 +511,7 @@ export function buildFurniture(styleId) {
 
   // 玄关
   place(g, [-1.803, -3.05, -1.482, -2.08], 'east', wardrobe(2.2));
+  place(g, [-1.482, -1.95, -1.462, -0.7], 'east', pegboard(0.9, 1.2));
 
   // 厨房：北墙灶台、东墙水槽
   place(g, [0, -3.63, 1.672, -3.03], 'south', counter);
