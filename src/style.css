@@ -73,7 +73,8 @@ body.night {
 
 .topbar,
 .panel,
-.toolbar {
+.toolbar,
+.style-bar {
   position: fixed;
   z-index: 2;
   background: var(--surface);
@@ -106,6 +107,21 @@ body.night {
 .title b {
   color: var(--text);
   font-weight: 600;
+}
+
+.style-bar {
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  max-width: calc(100% - 380px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.style-bar .text-btn {
+  flex: none;
 }
 
 .panel {
@@ -277,8 +293,16 @@ svg {
     display: grid;
   }
 
+  .style-bar {
+    top: 70px;
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    padding: 4px;
+  }
+
   .panel {
-    top: 76px;
+    top: 122px;
     left: 12px;
     right: 12px;
     width: auto;

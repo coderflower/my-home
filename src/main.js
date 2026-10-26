@@ -3,8 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { rooms } from './layout.js';
 import { roomCenter, roomBounds } from './geometry.js';
-import { buildHouse } from './house.js';
-import { buildFurniture, screenMaterial } from './furniture.js';
+import { buildHouse, setHouseColors } from './house.js';
+import { buildFurniture, screenMaterial, sharedMaterials, STYLES } from './furniture.js';
 import './style.css';
 
 const STORAGE_KEY = 'my-home:settings';
@@ -13,7 +13,7 @@ const LOW_CUT = 1.05;
 const PLAN_IMAGE = { src: 'floorplan.png', pxPerMeter: 44, origin: [384, 511] };
 
 const settings = Object.assign(
-  { wallMode: 'auto', night: false, labels: true, plan: false, lights: {} },
+  { wallMode: 'auto', night: false, labels: true, plan: false, lights: {}, style: STYLES[0].id },
   loadSettings(),
 );
 
@@ -65,7 +65,24 @@ controls.maxDistance = 40;
 
 const house = buildHouse();
 scene.add(house.group);
-scene.add(buildFurniture());
+let furniture = null;
+
+function applyStyle() {
+  if (furniture) {
+    scene.remove(furniture);
+    furniture.traverse((obj) => {
+      if (!obj.isMesh) return;
+      obj.geometry.dispose();
+      if (!sharedMaterials.has(obj.material)) {
+        obj.material.map?.dispose();
+        obj.material.dispose();
+      }
+    });
+  }
+  furniture = buildFurniture(settings.style);
+  scene.add(furniture);
+  setHouseColors(STYLES.find((s) => s.id === settings.style) ?? STYLES[0]);
+}
 
 const ground = new THREE.Mesh(
   new THREE.CircleGeometry(40, 64),
@@ -334,6 +351,21 @@ const buttons = {
   panel: document.getElementById('btn-panel'),
 };
 const wallButtons = document.querySelectorAll('[data-wall]');
+const styleBar = document.getElementById('style-bar');
+
+for (const s of STYLES) {
+  const btn = document.createElement('button');
+  btn.className = 'text-btn';
+  btn.dataset.style = s.id;
+  btn.textContent = s.name;
+  btn.addEventListener('click', () => {
+    settings.style = s.id;
+    saveSettings();
+    applyStyle();
+    syncUi();
+  });
+  styleBar.appendChild(btn);
+}
 
 buttons.view3d.addEventListener('click', () => flyTo(...defaultView()));
 buttons.viewTop.addEventListener('click', () => flyTo(...topView()));
@@ -367,6 +399,7 @@ function syncUi() {
   buttons.labels.classList.toggle('on', settings.labels);
   buttons.plan.classList.toggle('on', settings.plan);
   for (const btn of wallButtons) btn.classList.toggle('on', btn.dataset.wall === settings.wallMode);
+  for (const btn of styleBar.children) btn.classList.toggle('on', btn.dataset.style === settings.style);
   for (const li of roomList.children) {
     const on = settings.night && settings.lights[li.dataset.room] !== false;
     li.querySelector('.light-btn')?.classList.toggle('on', on);
@@ -409,6 +442,7 @@ function frame() {
   requestAnimationFrame(frame);
 }
 
+applyStyle();
 applyLighting();
 applyWallMode();
 syncUi();

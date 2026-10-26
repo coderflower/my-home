@@ -77,29 +77,39 @@ export function tileTexture(base, grout, meters) {
   }, meters);
 }
 
-// 中古几何地毯：奶油底，芥末黄 / 砖红 / 青绿半圆与圆点交替
-export function rugTexture() {
+// 地毯：spec.pattern 为 geo 几何半圆圆点 / stripe 条纹 / border 回字边框 / plain 素色带包边
+export function rugTexture(spec) {
+  const { pattern, base, colors, border } = spec;
   const texture = canvasTexture(1024, (ctx, size) => {
-    ctx.fillStyle = '#ece2cd';
+    ctx.fillStyle = base;
     ctx.fillRect(0, 0, size, size);
-    const colors = ['#c9962f', '#a5552f', '#4f7d7c', '#7f8b6c'];
-    const n = 4;
-    const cell = size / n;
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        ctx.fillStyle = colors[(i + j * 2) % colors.length];
-        ctx.beginPath();
-        const cx = i * cell + cell / 2;
-        const cy = j * cell + cell / 2;
-        if ((i + j) % 2) {
-          ctx.arc(cx, cy + cell * 0.18, cell * 0.36, Math.PI, 0);
-        } else {
-          ctx.arc(cx, cy, cell * 0.16, 0, Math.PI * 2);
+    if (pattern === 'geo') {
+      const n = 4;
+      const cell = size / n;
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          ctx.fillStyle = colors[(i + j * 2) % colors.length];
+          ctx.beginPath();
+          const cx = i * cell + cell / 2;
+          const cy = j * cell + cell / 2;
+          if ((i + j) % 2) ctx.arc(cx, cy + cell * 0.18, cell * 0.36, Math.PI, 0);
+          else ctx.arc(cx, cy, cell * 0.16, 0, Math.PI * 2);
+          ctx.fill();
         }
-        ctx.fill();
       }
+    } else if (pattern === 'stripe') {
+      for (let i = 0; i < 12; i++) {
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillRect(0, ((i + 0.5) * size) / 12, size, size / 60);
+      }
+    } else if (pattern === 'border') {
+      ctx.strokeStyle = colors[0];
+      ctx.lineWidth = 14;
+      ctx.strokeRect(110, 110, size - 220, size - 220);
+      ctx.lineWidth = 5;
+      ctx.strokeRect(150, 150, size - 300, size - 300);
     }
-    ctx.strokeStyle = '#5e3d26';
+    ctx.strokeStyle = border;
     ctx.lineWidth = 10;
     ctx.strokeRect(18, 18, size - 36, size - 36);
   }, 1);

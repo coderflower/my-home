@@ -20,8 +20,16 @@ function structural(mesh, y0, y1, kind) {
 }
 
 // 每段墙独立材质，自动避让时才能单独调透明度；顶面深色便于俯视时看清墙线
+const wallSides = [];
+
+export function setHouseColors({ wall, door }) {
+  for (const m of wallSides) m.color.setHex(wall);
+  leafMat.color.setHex(door);
+}
+
 function wallMaterial() {
   const side = new THREE.MeshStandardMaterial({ color: 0xf0e9dc, roughness: 0.95 });
+  wallSides.push(side);
   const top = new THREE.MeshStandardMaterial({ color: 0x3b3b3b, roughness: 0.9 });
   return [side, side, top, side, side, side];
 }
