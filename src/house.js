@@ -7,7 +7,7 @@ const frameMat = new THREE.MeshStandardMaterial({ color: 0x8d9093, roughness: 0.
 const glassMat = new THREE.MeshPhysicalMaterial({
   color: 0xcfe6ef, roughness: 0.05, transparent: true, opacity: 0.28, depthWrite: false,
 });
-const leafMat = new THREE.MeshStandardMaterial({ color: 0xe9e4da, roughness: 0.7 });
+const leafMat = new THREE.MeshStandardMaterial({ color: 0x7a5233, roughness: 0.55 });
 const entryLeafMat = new THREE.MeshStandardMaterial({ color: 0x4a4c50, roughness: 0.5, metalness: 0.3 });
 
 // 结构构件统一记录原始上下标高，矮墙模式据此按高度裁切
@@ -21,7 +21,7 @@ function structural(mesh, y0, y1, kind) {
 
 // 每段墙独立材质，自动避让时才能单独调透明度；顶面深色便于俯视时看清墙线
 function wallMaterial() {
-  const side = new THREE.MeshStandardMaterial({ color: 0xf1eee8, roughness: 0.95 });
+  const side = new THREE.MeshStandardMaterial({ color: 0xf0e9dc, roughness: 0.95 });
   const top = new THREE.MeshStandardMaterial({ color: 0x3b3b3b, roughness: 0.9 });
   return [side, side, top, side, side, side];
 }

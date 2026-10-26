@@ -77,15 +77,31 @@ export function tileTexture(base, grout, meters) {
   }, meters);
 }
 
+// 中古几何地毯：奶油底，芥末黄 / 砖红 / 青绿半圆与圆点交替
 export function rugTexture() {
-  const texture = canvasTexture(512, (ctx, size) => {
-    ctx.fillStyle = '#d9d2c3';
+  const texture = canvasTexture(1024, (ctx, size) => {
+    ctx.fillStyle = '#ece2cd';
     ctx.fillRect(0, 0, size, size);
-    const stripes = ['#9aa58a', '#d9d2c3', '#c4b9a3', '#d9d2c3'];
-    for (let i = 0; i < 16; i++) {
-      ctx.fillStyle = stripes[i % stripes.length];
-      ctx.fillRect(0, (i * size) / 16, size, size / 32);
+    const colors = ['#c9962f', '#a5552f', '#4f7d7c', '#7f8b6c'];
+    const n = 4;
+    const cell = size / n;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        ctx.fillStyle = colors[(i + j * 2) % colors.length];
+        ctx.beginPath();
+        const cx = i * cell + cell / 2;
+        const cy = j * cell + cell / 2;
+        if ((i + j) % 2) {
+          ctx.arc(cx, cy + cell * 0.18, cell * 0.36, Math.PI, 0);
+        } else {
+          ctx.arc(cx, cy, cell * 0.16, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
     }
+    ctx.strokeStyle = '#5e3d26';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(18, 18, size - 36, size - 36);
   }, 1);
   texture.repeat.set(1, 1);
   return texture;

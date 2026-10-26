@@ -4,26 +4,33 @@ import { rugTexture } from './textures.js';
 const mat = (color, roughness = 0.7, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
 
 const M = {
-  white: mat(0xf4f3ef, 0.5),
-  cabinet: mat(0xeceae4, 0.45),
-  counter: mat(0xfafafa, 0.25),
-  wood: mat(0xb0835a, 0.6),
-  darkWood: mat(0x6b4a33, 0.6),
-  fabric: mat(0x8e9295, 0.95),
-  sofa: mat(0x5d6266, 0.95),
-  linen: mat(0xf2efe8, 0.95),
-  duvet: mat(0xc9d3d8, 0.95),
-  kidDuvet: mat(0xf0c987, 0.95),
-  pillow: mat(0xfbfaf6, 0.95),
+  white: mat(0xf2ede3, 0.5),
+  cream: mat(0xeee4cf, 0.6),
+  cabinet: mat(0x7a5537, 0.5),
+  walnut: mat(0x5e3d26, 0.5),
+  counter: mat(0xf4efe6, 0.25),
+  terrazzo: mat(0xe6ddcc, 0.4),
+  sage: mat(0x7f8b6c, 0.6),
+  wood: mat(0x9a6639, 0.5),
+  darkWood: mat(0x5e3d26, 0.55),
+  cane: mat(0xd6bd86, 0.9),
+  sofa: mat(0xa5552f, 0.95),
+  leather: mat(0x8a4a22, 0.45),
+  mustard: mat(0xc9962f, 0.95),
+  linen: mat(0xf0e8d8, 0.95),
+  duvet: mat(0xc9962f, 0.95),
+  guestDuvet: mat(0x7f8b6c, 0.95),
+  kidDuvet: mat(0x5f8a8b, 0.95),
+  pillow: mat(0xf6f0e3, 0.95),
   black: mat(0x1d1f22, 0.4, 0.2),
+  brass: mat(0xb8913f, 0.3, 0.85),
   metal: mat(0xa9adb1, 0.35, 0.7),
   screen: new THREE.MeshStandardMaterial({ color: 0x0b0d10, roughness: 0.2, emissive: 0x000000 }),
   ceramic: mat(0xffffff, 0.15),
-  green: mat(0x5b7f4a, 0.9),
-  olive: mat(0x7d8452, 0.9),
-  cream: mat(0xe8dcc4, 0.9),
-  pot: mat(0xc9b8a0, 0.8),
-  mirror: mat(0xdfe8ec, 0.05, 0.9),
+  green: mat(0x4f7445, 0.9),
+  opal: new THREE.MeshStandardMaterial({ color: 0xfff6e6, roughness: 0.3, emissive: 0x3a2e1c }),
+  pot: mat(0xb5643c, 0.8),
+  mirror: mat(0xcfdde3, 0.15, 0.3),
   glass: new THREE.MeshStandardMaterial({ color: 0xcfe6ef, roughness: 0.05, transparent: true, opacity: 0.3, depthWrite: false }),
 };
 
@@ -43,6 +50,33 @@ function cyl(rTop, rBottom, h, material, x = 0, y = 0, z = 0, seg = 24) {
   return mesh;
 }
 
+function sphere(r, material, x, y, z) {
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), material);
+  mesh.position.set(x, y, z);
+  mesh.castShadow = true;
+  return mesh;
+}
+
+// 黄铜圆钮
+function knob(x, y, z) {
+  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.025, 16), M.brass);
+  mesh.rotation.x = Math.PI / 2;
+  mesh.position.set(x, y, z + 0.012);
+  return mesh;
+}
+
+// 中古家具标志性的锥形外撇腿：上粗下细，向外倾斜
+function taperedLegs(g, w, d, height, inset = 0.06, material = M.walnut) {
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const leg = cyl(0.022, 0.012, height, material, 0, -height, 0, 10);
+    const pivot = new THREE.Group();
+    pivot.position.set((sx * w) / 2 - sx * inset, height, (sz * d) / 2 - sz * inset);
+    pivot.rotation.set(-sz * 0.1, 0, sx * 0.1);
+    pivot.add(leg);
+    g.add(pivot);
+  }
+}
+
 const FACING = { south: 0, east: Math.PI / 2, north: Math.PI, west: -Math.PI / 2 };
 
 // rect 为 [x1, z1, x2, z2]（米）。builder 在局部坐标里建模：宽 w 沿 x，进深 d 沿 z，正面朝 +z
@@ -59,150 +93,194 @@ function place(parent, rect, facing, builder) {
   return g;
 }
 
+// 胡桃木低床架 + 竖条床头
 function bed(color) {
   return (g, w, d) => {
-    g.add(box(w, 0.28, d, M.wood, 0, 0.04));
-    g.add(box(w - 0.06, 0.22, d - 0.1, M.linen, 0, 0.32, 0.03));
-    g.add(box(w - 0.02, 0.06, d * 0.68, color, 0, 0.54, d * 0.15));
-    g.add(box(w + 0.04, 1.0, 0.08, M.darkWood, 0, 0, -d / 2 + 0.02));
+    g.add(box(w, 0.16, d, M.walnut, 0, 0.16));
+    taperedLegs(g, w, d, 0.16, 0.08);
+    g.add(box(w - 0.06, 0.22, d - 0.1, M.linen, 0, 0.3, 0.03));
+    g.add(box(w - 0.02, 0.06, d * 0.68, color, 0, 0.52, d * 0.15));
+    const slats = Math.round(w / 0.12);
+    for (let i = 0; i < slats; i++) {
+      g.add(box(w / slats - 0.02, 0.62, 0.05, M.walnut, -w / 2 + (w / slats) * (i + 0.5), 0.32, -d / 2 + 0.03));
+    }
+    g.add(box(w + 0.04, 0.04, 0.08, M.walnut, 0, 0.94, -d / 2 + 0.03));
     const pillows = w > 1.3 ? [-w / 4, w / 4] : [0];
-    for (const x of pillows) g.add(box(Math.min(0.6, w / 2 - 0.1), 0.12, 0.38, M.pillow, x, 0.52, -d / 2 + 0.3));
+    for (const x of pillows) g.add(box(Math.min(0.6, w / 2 - 0.1), 0.12, 0.38, M.pillow, x, 0.5, -d / 2 + 0.3));
+    g.add(box(Math.min(0.4, w / 3), 0.1, 0.12, M.mustard, 0, 0.56, -d / 2 + 0.52));
   };
+}
+
+// 柚木柜门 + 黄铜圆钮，柜体底部留出踢脚凹槽
+function cabinetDoors(g, x0, x1, y0, height, d, width = 0.45, material = M.cabinet, knobY = null) {
+  if (x1 - x0 < 0.1) return;
+  const n = Math.max(1, Math.round((x1 - x0) / width));
+  const dw = (x1 - x0) / n;
+  for (let i = 0; i < n; i++) {
+    const x = x0 + dw * (i + 0.5);
+    g.add(box(dw - 0.006, height, d, material, x, y0));
+    const kx = x + (i % 2 ? -1 : 1) * (dw / 2 - 0.05);
+    g.add(knob(kx, knobY ?? y0 + Math.min(height / 2, 1.0), d / 2));
+  }
 }
 
 function wardrobe(height = 2.3) {
   return (g, w, d) => {
-    const n = Math.max(2, Math.round(w / 0.5));
-    const dw = w / n;
-    for (let i = 0; i < n; i++) {
-      const x = -w / 2 + dw * (i + 0.5);
-      g.add(box(dw - 0.008, height, d, M.cabinet, x, 0));
-      const hx = x + (i % 2 ? -1 : 1) * (dw / 2 - 0.06);
-      g.add(box(0.02, 0.3, 0.025, M.metal, hx, 0.95, d / 2 + 0.01));
-    }
+    g.add(box(w, 0.08, d - 0.04, M.walnut, 0, 0, -0.02));
+    cabinetDoors(g, -w / 2, w / 2, 0.08, height - 0.08, d, 0.5);
   };
 }
 
 function nightstand(g, w, d) {
-  g.add(box(w, 0.5, d, M.white));
-  g.add(box(0.12, 0.02, 0.02, M.metal, 0, 0.36, d / 2 + 0.01));
+  taperedLegs(g, w, d, 0.2, 0.05);
+  g.add(box(w, 0.32, d, M.walnut, 0, 0.2));
+  g.add(box(w - 0.04, 0.005, 0.01, M.black, 0, 0.36, d / 2 + 0.002));
+  g.add(knob(0, 0.44, d / 2));
+  g.add(knob(0, 0.28, d / 2));
 }
 
+// 叉骨椅：柚木框 + 纸绳编织座面 + 弧形靠背横杆
 function chair(g, w, d) {
-  g.add(box(w, 0.06, d, M.fabric, 0, 0.42));
-  g.add(box(w, 0.42, 0.05, M.fabric, 0, 0.48, -d / 2 + 0.03));
-  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    g.add(cyl(0.015, 0.015, 0.42, M.darkWood, (x * (w - 0.06)) / 2, 0, (z * (d - 0.06)) / 2, 8));
-  }
+  taperedLegs(g, w, d, 0.42, 0.05, M.wood);
+  g.add(box(w - 0.04, 0.04, d - 0.04, M.cane, 0, 0.42));
+  g.add(box(w - 0.02, 0.025, 0.04, M.wood, 0, 0.42, d / 2 - 0.03));
+  for (const s of [-1, 1]) g.add(cyl(0.012, 0.016, 0.3, M.wood, (s * (w - 0.1)) / 2, 0.44, -d / 2 + 0.06, 8));
+  g.add(box(w - 0.04, 0.05, 0.06, M.wood, 0, 0.72, -d / 2 + 0.06));
 }
 
 function table(height, top) {
   return (g, w, d) => {
-    g.add(box(w, 0.04, d, top, 0, height - 0.04));
-    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-      g.add(box(0.05, height - 0.04, 0.05, M.darkWood, (x * (w - 0.1)) / 2, 0, (z * (d - 0.1)) / 2));
-    }
+    g.add(box(w, 0.035, d, top, 0, height - 0.035));
+    g.add(box(w - 0.16, 0.06, d - 0.16, top, 0, height - 0.095));
+    taperedLegs(g, w, d, height - 0.035, 0.12);
   };
 }
 
+// 中古三人沙发：砖红布艺，独立靠包，木扶手，锥形腿抬高
 function sofa(g, w, d) {
-  g.add(box(w, 0.2, d, M.sofa, 0, 0.08));
+  taperedLegs(g, w, d, 0.16, 0.08);
+  g.add(box(w, 0.04, d, M.walnut, 0, 0.16));
   const seats = 3;
+  const inner = w - 0.12;
   for (let i = 0; i < seats; i++) {
-    const sw = (w - 0.36) / seats;
-    g.add(box(sw - 0.02, 0.16, d - 0.28, M.sofa, -w / 2 + 0.18 + sw * (i + 0.5), 0.28, 0.1));
-    g.add(box(sw - 0.04, 0.42, 0.18, M.sofa, -w / 2 + 0.18 + sw * (i + 0.5), 0.36, -d / 2 + 0.2));
+    const sw = inner / seats;
+    const x = -inner / 2 + sw * (i + 0.5);
+    g.add(box(sw - 0.02, 0.18, d - 0.22, M.sofa, x, 0.2, 0.08));
+    g.add(box(sw - 0.04, 0.44, 0.16, M.sofa, x, 0.38, -d / 2 + 0.16));
   }
-  g.add(box(w, 0.42, 0.14, M.sofa, 0, 0.28, -d / 2 + 0.07));
-  for (const s of [-1, 1]) g.add(box(0.16, 0.42, d, M.sofa, (s * (w - 0.16)) / 2, 0.18));
-  for (const s of [-1, 1]) g.add(box(0.05, 0.08, 0.05, M.darkWood, (s * (w - 0.2)) / 2, 0, 0));
+  g.add(box(w, 0.5, 0.08, M.sofa, 0, 0.2, -d / 2 + 0.04));
+  for (const s of [-1, 1]) {
+    g.add(box(0.06, 0.04, d - 0.04, M.walnut, (s * (w - 0.06)) / 2, 0.56));
+    g.add(box(0.04, 0.36, 0.04, M.walnut, (s * (w - 0.06)) / 2, 0.2, d / 2 - 0.06));
+  }
+  g.add(box(0.36, 0.3, 0.12, M.mustard, -inner / 3, 0.4, -d / 2 + 0.3));
 }
 
-// 满墙电视柜：中间电视龛（悬空地柜 + 顶柜 + 木饰面背板），两侧通顶柜。niche 为电视龛中心的局部 x
+// 满墙电视柜：中间电视龛（悬空胡桃木地柜 + 顶柜 + 竖条木饰面背板），两侧通顶柜。niche 为电视龛中心的局部 x
 function tvCabinetWall(niche, nicheWidth = 2.6, height = 2.68) {
-  const doors = (g, x0, x1, d) => {
-    if (x1 - x0 < 0.1) return;
-    const n = Math.max(1, Math.round((x1 - x0) / 0.45));
-    const dw = (x1 - x0) / n;
-    for (let i = 0; i < n; i++) {
-      const x = x0 + dw * (i + 0.5);
-      g.add(box(dw - 0.008, height, d, M.cabinet, x));
-      g.add(box(0.02, 0.4, 0.025, M.metal, x + (i % 2 ? -1 : 1) * (dw / 2 - 0.05), 1.0, d / 2 + 0.01));
-    }
-  };
   return (g, w, d) => {
     const n0 = niche - nicheWidth / 2;
     const n1 = niche + nicheWidth / 2;
-    doors(g, -w / 2, n0, d);
-    doors(g, n1, w / 2, d);
-    g.add(box(nicheWidth, 0.4, d, M.cabinet, niche, 0.2));
-    g.add(box(nicheWidth - 0.1, 0.02, 0.02, M.metal, niche, 0.55, d / 2 + 0.01));
-    g.add(box(nicheWidth, height - 2.3, d, M.cabinet, niche, 2.3));
-    g.add(box(nicheWidth, 1.7, 0.03, M.wood, niche, 0.6, -d / 2 + 0.015));
-    g.add(box(1.65, 0.95, 0.04, M.screen, niche, 1.0, -d / 2 + 0.05));
+    cabinetDoors(g, -w / 2, n0, 0, height, d);
+    cabinetDoors(g, n1, w / 2, 0, height, d);
+    cabinetDoors(g, n0, n1, 0.2, 0.42, d, 0.65, M.walnut, 0.41);
+    cabinetDoors(g, n0, n1, 2.3, height - 2.3, d, 0.65, M.cabinet, 2.36);
+    const slats = Math.round(nicheWidth / 0.08);
+    for (let i = 0; i < slats; i++) {
+      g.add(box(nicheWidth / slats - 0.015, 1.68, 0.03, M.wood, n0 + (nicheWidth / slats) * (i + 0.5), 0.62, -d / 2 + 0.015));
+    }
+    g.add(box(1.65, 0.95, 0.04, M.screen, niche, 1.0, -d / 2 + 0.06));
   };
 }
 
-// 餐边柜：下柜 + 台面 + 木饰面开放格 + 通顶吊柜
+// 餐边柜：胡桃木下柜 + 水磨石台面 + 鼠尾草绿背板开放格 + 奶油色通顶吊柜
 function sideboard(height = 2.68) {
   return (g, w, d) => {
-    const n = Math.max(2, Math.round(w / 0.45));
-    const dw = w / n;
-    for (let i = 0; i < n; i++) {
-      const x = -w / 2 + dw * (i + 0.5);
-      const hx = x + (i % 2 ? -1 : 1) * (dw / 2 - 0.05);
-      g.add(box(dw - 0.008, 0.82, d, M.cabinet, x));
-      g.add(box(0.02, 0.2, 0.025, M.metal, hx, 0.55, d / 2 + 0.01));
-      g.add(box(dw - 0.008, height - 1.45, d - 0.05, M.cabinet, x, 1.45, -0.025));
-      g.add(box(0.02, 0.2, 0.025, M.metal, hx, 1.5, d / 2 - 0.04));
-    }
-    g.add(box(w, 0.03, d + 0.02, M.counter, 0, 0.82, 0.01));
-    g.add(box(w, 0.6, 0.03, M.wood, 0, 0.85, -d / 2 + 0.015));
+    cabinetDoors(g, -w / 2, w / 2, 0.1, 0.72, d, 0.45, M.walnut, 0.7);
+    g.add(box(w, 0.1, d - 0.04, M.black, 0, 0, -0.02));
+    g.add(box(w, 0.03, d + 0.02, M.terrazzo, 0, 0.82, 0.01));
+    g.add(box(w, 0.6, 0.03, M.sage, 0, 0.85, -d / 2 + 0.015));
+    cabinetDoors(g, -w / 2, w / 2, 1.45, height - 1.45, d - 0.05, 0.45, M.cream, 1.52);
   };
 }
 
+// 伊姆斯式休闲椅：胡桃木壳 + 焦糖皮垫 + 黑色星形底座
 function lounge(g, w, d) {
-  g.add(box(w, 0.36, d, M.olive, 0, 0.1));
-  g.add(box(w, 0.5, 0.16, M.olive, 0, 0.46, -d / 2 + 0.08));
-  for (const s of [-1, 1]) g.add(box(0.12, 0.3, d, M.olive, (s * (w - 0.12)) / 2, 0.46));
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+    const foot = box(0.04, 0.03, Math.min(w, d) / 2, M.black, 0, 0.02);
+    foot.position.set((Math.cos(a) * Math.min(w, d)) / 4, 0.035, (Math.sin(a) * Math.min(w, d)) / 4);
+    foot.rotation.y = -a + Math.PI / 2;
+    g.add(foot);
+  }
+  g.add(cyl(0.03, 0.03, 0.25, M.black, 0, 0.03));
+  g.add(box(w, 0.06, d - 0.1, M.walnut, 0, 0.28, 0.03));
+  g.add(box(w - 0.08, 0.1, d - 0.16, M.leather, 0, 0.34, 0.05));
+  const back = new THREE.Group();
+  back.position.set(0, 0.34, -d / 2 + 0.08);
+  back.rotation.x = -0.25;
+  back.add(box(w, 0.6, 0.06, M.walnut, 0, 0, -0.04));
+  back.add(box(w - 0.08, 0.56, 0.08, M.leather, 0, 0.02, 0.02));
+  g.add(back);
+  for (const s of [-1, 1]) g.add(box(0.08, 0.04, d * 0.6, M.leather, (s * (w - 0.08)) / 2, 0.52, 0.02));
 }
 
 function plant(g) {
-  g.add(cyl(0.16, 0.12, 0.34, M.pot));
+  taperedLegs(g, 0.3, 0.3, 0.22, 0.04, M.wood);
+  g.add(cyl(0.15, 0.15, 0.02, M.wood, 0, 0.22));
+  g.add(cyl(0.15, 0.11, 0.3, M.pot, 0, 0.24));
   const leaf = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3, 1), M.green);
-  leaf.position.y = 0.72;
+  leaf.position.y = 0.92;
   leaf.scale.set(1, 1.3, 1);
   leaf.castShadow = true;
   g.add(leaf);
 }
 
+// 黄铜落地灯 + 乳白球形灯罩
 function floorLamp(g) {
-  g.add(cyl(0.14, 0.16, 0.03, M.black));
-  g.add(cyl(0.012, 0.012, 1.5, M.black));
-  g.add(cyl(0.12, 0.2, 0.26, M.cream, 0, 1.45));
+  g.add(cyl(0.14, 0.15, 0.025, M.brass));
+  g.add(cyl(0.01, 0.01, 1.45, M.brass));
+  g.add(sphere(0.16, M.opal, 0, 1.6, 0));
+}
+
+// 乳白球形吊灯
+function pendant(g) {
+  g.add(cyl(0.006, 0.006, 0.8, M.brass, 0, 1.9));
+  g.add(cyl(0.05, 0.05, 0.02, M.brass, 0, 2.68));
+  g.add(sphere(0.2, M.opal, 0, 1.75, 0));
+}
+
+function coffeeTable(g, w, d) {
+  taperedLegs(g, w, d, 0.36, 0.2);
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.04, 48), M.walnut);
+  top.scale.set(w, 1, d);
+  top.position.y = 0.38;
+  top.castShadow = top.receiveShadow = true;
+  g.add(top);
 }
 
 function counter(g, w, d) {
-  g.add(box(w, 0.82, d - 0.02, M.cabinet, 0, 0.08, -0.01));
+  cabinetDoors(g, -w / 2, w / 2, 0.08, 0.82, d - 0.02, 0.45, M.cabinet, 0.75);
   g.add(box(w, 0.08, d - 0.08, M.black, 0, 0, -0.04));
-  g.add(box(w, 0.04, d, M.counter, 0, 0.9));
+  g.add(box(w, 0.04, d, M.terrazzo, 0, 0.9));
 }
 
 function upperCabinet(g, w, d) {
-  g.add(box(w, 0.7, d, M.cabinet, 0, 1.5));
+  cabinetDoors(g, -w / 2, w / 2, 1.5, 0.7, d, 0.45, M.cream, 1.56);
+  g.add(box(w, 0.56, 0.01, M.sage, 0, 0.94, -d / 2 + 0.005));
 }
 
 function fridge(g, w, d) {
-  g.add(box(w, 1.85, d, M.metal));
+  g.add(box(w, 1.85, d, M.cream));
   if (w < 0.8) {
-    g.add(box(0.02, 0.5, 0.03, M.black, w / 2 - 0.08, 1.1, d / 2 + 0.01));
+    g.add(box(0.02, 0.5, 0.03, M.brass, w / 2 - 0.08, 1.1, d / 2 + 0.01));
     return;
   }
   g.add(box(0.006, 1.85, 0.01, M.black, 0, 0, d / 2 + 0.003));
   g.add(box(w, 0.006, 0.01, M.black, 0, 0.95, d / 2 + 0.003));
   for (const x of [-0.04, 0.04]) {
-    g.add(box(0.02, 0.45, 0.03, M.black, x, 1.15, d / 2 + 0.01));
-    g.add(box(0.02, 0.3, 0.03, M.black, x, 0.55, d / 2 + 0.01));
+    g.add(box(0.02, 0.45, 0.03, M.brass, x, 1.15, d / 2 + 0.01));
+    g.add(box(0.02, 0.3, 0.03, M.brass, x, 0.55, d / 2 + 0.01));
   }
 }
 
@@ -210,7 +288,7 @@ function fridge(g, w, d) {
 function pullOutCabinet(height) {
   return (g, w, d) => {
     g.add(box(w, height, d, M.cabinet));
-    g.add(box(0.025, 0.02, 0.025, M.metal, 0, height - 0.12, d / 2 + 0.01));
+    g.add(box(0.025, 0.02, 0.025, M.brass, 0, height - 0.12, d / 2 + 0.01));
   };
 }
 
@@ -220,11 +298,18 @@ function toilet(g) {
   g.add(cyl(0.19, 0.19, 0.03, M.ceramic, 0, 0.4, 0.04));
 }
 
+// 胡桃木浴室柜 + 圆镜
 function vanity(g, w, d) {
-  g.add(box(w, 0.5, d, M.wood, 0, 0.35));
-  g.add(box(w, 0.03, d, M.counter, 0, 0.85));
+  cabinetDoors(g, -w / 2, w / 2, 0.35, 0.5, d, 0.5, M.walnut, 0.75);
+  g.add(box(w, 0.03, d, M.terrazzo, 0, 0.85));
   g.add(cyl(0.18, 0.15, 0.12, M.ceramic, 0, 0.88, 0.02));
-  g.add(box(w * 0.8, 0.75, 0.02, M.mirror, 0, 1.15, -d / 2 + 0.01));
+  const mirror = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.02, 48), M.mirror);
+  mirror.rotation.x = Math.PI / 2;
+  mirror.position.set(0, 1.5, -d / 2 + 0.02);
+  g.add(mirror);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.335, 0.012, 8, 48), M.brass);
+  rim.position.set(0, 1.5, -d / 2 + 0.03);
+  g.add(rim);
 }
 
 function washer(g, w, d) {
@@ -245,33 +330,28 @@ function washerDryer(g, w, d) {
 }
 
 function laundrySink(g, w, d) {
-  g.add(box(w, 0.8, d, M.cabinet));
-  g.add(box(w, 0.04, d, M.counter, 0, 0.8));
+  cabinetDoors(g, -w / 2, w / 2, 0, 0.8, d, 0.45, M.cabinet, 0.7);
+  g.add(box(w, 0.04, d, M.terrazzo, 0, 0.8));
   g.add(box(w - 0.14, 0.02, d - 0.2, M.metal, 0, 0.83, 0.02));
-  g.add(cyl(0.015, 0.015, 0.3, M.metal, 0, 0.84, -d / 2 + 0.06, 8));
-  g.add(box(0.03, 0.03, 0.18, M.metal, 0, 1.11, -d / 2 + 0.14));
+  g.add(cyl(0.015, 0.015, 0.3, M.brass, 0, 0.84, -d / 2 + 0.06, 8));
+  g.add(box(0.03, 0.03, 0.18, M.brass, 0, 1.11, -d / 2 + 0.14));
 }
 
 function wallCabinet(y0, height) {
-  return (g, w, d) => {
-    const n = Math.max(2, Math.round(w / 0.45));
-    const dw = w / n;
-    for (let i = 0; i < n; i++) {
-      const x = -w / 2 + dw * (i + 0.5);
-      g.add(box(dw - 0.008, height, d, M.cabinet, x, y0));
-      g.add(box(0.12, 0.02, 0.025, M.metal, x, y0 + 0.06, d / 2 + 0.01));
-    }
-  };
+  return (g, w, d) => cabinetDoors(g, -w / 2, w / 2, y0, height, d, 0.45, M.cream, y0 + 0.06);
 }
 
 function desk(g, w, d) {
-  table(0.75, M.wood)(g, w, d);
+  g.add(box(w, 0.035, d, M.walnut, 0, 0.715));
+  g.add(box(0.5, 0.14, d - 0.04, M.walnut, w / 2 - 0.27, 0.575, 0.02));
+  g.add(knob(w / 2 - 0.27, 0.645, d / 2));
+  taperedLegs(g, w, d, 0.715, 0.08);
 }
 
 function shower(g, w, d) {
   g.add(box(w, 2.0, 0.02, M.glass, 0, 0.02, d / 2));
-  g.add(cyl(0.12, 0.12, 0.02, M.metal, 0, 2.05, 0));
-  g.add(cyl(0.012, 0.012, 1.2, M.metal, 0, 0.9, -d / 2 + 0.04, 8));
+  g.add(cyl(0.12, 0.12, 0.02, M.brass, 0, 2.05, 0));
+  g.add(cyl(0.012, 0.012, 1.2, M.brass, 0, 0.9, -d / 2 + 0.04, 8));
 }
 
 function rug(parent, [x1, z1, x2, z2]) {
@@ -306,7 +386,8 @@ export function buildFurniture() {
   place(g, [-2.153, -0.38, -1.473, 0.52], 'east', fridge);
   place(g, [-2.173, -0.58, -1.473, -0.39], 'east', pullOutCabinet(1.85));
   place(g, [-2.173, -0.58, -1.473, 0.52], 'east', wallCabinet(1.9, 0.78));
-  place(g, [-0.6, 0.15, 1.0, 0.95], 'south', table(0.75, M.wood));
+  place(g, [-0.6, 0.15, 1.0, 0.95], 'south', table(0.75, M.walnut));
+  place(g, [-0.1, 0.35, 0.5, 0.75], 'south', pendant);
   for (const x of [-0.3, 0.25]) {
     place(g, [x, -0.3, x + 0.45, 0.12], 'south', chair);
     place(g, [x, 0.98, x + 0.45, 1.4], 'north', chair);
@@ -316,10 +397,7 @@ export function buildFurniture() {
   rug(g, [-1.2, 2.7, 0.6, 4.9]);
   place(g, [0.75, 2.7, 1.597, 4.9], 'west', sofa);
   place(g, [-1.803, 2.5, -1.403, 6.02], 'east', tvCabinetWall(0.46));
-  place(g, [-0.6, 3.5, 0.0, 4.1], 'south', (gg) => {
-    gg.add(cyl(0.3, 0.3, 0.04, M.white, 0, 0.38));
-    gg.add(cyl(0.04, 0.12, 0.38, M.white));
-  });
+  place(g, [-0.75, 3.3, 0.15, 4.3], 'east', coffeeTable);
   const armchair = place(g, [-1.0, 5.1, -0.3, 5.75], 'north', lounge);
   armchair.rotation.y = Math.PI * 0.8;
   place(g, [1.2, 5.0, 1.45, 5.25], 'south', floorLamp);
@@ -345,7 +423,7 @@ export function buildFurniture() {
 
   // 次卧
   place(g, [2.9, 2.22, 4.59, 2.82], 'south', wardrobe());
-  place(g, [2.55, 3.15, 4.59, 4.7], 'west', bed(M.duvet));
+  place(g, [2.55, 3.15, 4.59, 4.7], 'west', bed(M.guestDuvet));
   place(g, [4.15, 4.72, 4.59, 5.1], 'west', nightstand);
 
   // 阳台
