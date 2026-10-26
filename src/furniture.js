@@ -195,13 +195,6 @@ function shower(g, w, d) {
   g.add(cyl(0.012, 0.012, 1.2, M.metal, 0, 0.9, -d / 2 + 0.04, 8));
 }
 
-function cushion(color) {
-  return (g, w, d) => {
-    g.add(box(w - 0.08, 0.08, d - 0.08, color, 0, 0.45));
-    g.add(box(0.4, 0.3, 0.12, M.pillow, -w / 2 + 0.4, 0.53, -d / 2 + 0.14));
-  };
-}
-
 function rug(parent, [x1, z1, x2, z2]) {
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(x2 - x1, z2 - z1),
@@ -211,13 +204,6 @@ function rug(parent, [x1, z1, x2, z2]) {
   mesh.position.set((x1 + x2) / 2, 0.006, (z1 + z2) / 2);
   mesh.receiveShadow = true;
   parent.add(mesh);
-}
-
-function bayWindow(color) {
-  return (g, w, d) => {
-    g.add(box(w, 0.45, d, M.counter));
-    cushion(color)(g, w, d);
-  };
 }
 
 export function buildFurniture() {
@@ -256,7 +242,6 @@ export function buildFurniture() {
   armchair.rotation.y = Math.PI * 0.8;
   place(g, [1.2, 5.0, 1.45, 5.25], 'south', floorLamp);
   place(g, [-1.8, 5.75, -1.5, 6.1], 'south', plant);
-  place(g, [-1.463, 6.165, 1.372, 6.735], 'north', bayWindow(M.cream));
 
   // 卫生间与过道洗手台
   place(g, [1.72, -0.78, 2.55, 0.93], 'east', shower);
@@ -275,7 +260,6 @@ export function buildFurniture() {
   place(g, [5.75, 2.6, 7.77, 4.4], 'west', bed(M.duvet));
   place(g, [7.3, 2.15, 7.75, 2.55], 'west', nightstand);
   place(g, [7.3, 4.45, 7.75, 4.85], 'west', nightstand);
-  place(g, [5.152, 5.22, 7.392, 5.865], 'north', bayWindow(M.linen));
   place(g, [4.63, 3.1, 4.75, 3.9], 'east', acIndoor);
 
   // 次卧
