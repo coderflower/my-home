@@ -118,10 +118,28 @@ function sofa(g, w, d) {
   for (const s of [-1, 1]) g.add(box(0.05, 0.08, 0.05, M.darkWood, (s * (w - 0.2)) / 2, 0, 0));
 }
 
-function tvWall(g, w, d) {
-  g.add(box(w, 0.42, d, M.white, 0, 0.12));
-  g.add(box(w - 0.1, 0.03, 0.03, M.metal, 0, 0.12, d / 2));
-  g.add(box(1.45, 0.83, 0.04, M.screen, 0, 1.0, -d / 2 + 0.06));
+// 满墙电视柜：中间电视龛（悬空地柜 + 顶柜 + 木饰面背板），两侧通顶柜。niche 为电视龛中心的局部 x
+function tvCabinetWall(niche, nicheWidth = 2.6, height = 2.68) {
+  const doors = (g, x0, x1, d) => {
+    const n = Math.max(1, Math.round((x1 - x0) / 0.45));
+    const dw = (x1 - x0) / n;
+    for (let i = 0; i < n; i++) {
+      const x = x0 + dw * (i + 0.5);
+      g.add(box(dw - 0.008, height, d, M.cabinet, x));
+      g.add(box(0.02, 0.4, 0.025, M.metal, x + (i % 2 ? -1 : 1) * (dw / 2 - 0.05), 1.0, d / 2 + 0.01));
+    }
+  };
+  return (g, w, d) => {
+    const n0 = niche - nicheWidth / 2;
+    const n1 = niche + nicheWidth / 2;
+    doors(g, -w / 2, n0, d);
+    doors(g, n1, w / 2, d);
+    g.add(box(nicheWidth, 0.4, d, M.cabinet, niche, 0.2));
+    g.add(box(nicheWidth - 0.1, 0.02, 0.02, M.metal, niche, 0.55, d / 2 + 0.01));
+    g.add(box(nicheWidth, height - 2.3, d, M.cabinet, niche, 2.3));
+    g.add(box(nicheWidth, 1.7, 0.03, M.wood, niche, 0.6, -d / 2 + 0.015));
+    g.add(box(1.65, 0.95, 0.04, M.screen, niche, 1.0, -d / 2 + 0.05));
+  };
 }
 
 function lounge(g, w, d) {
@@ -162,7 +180,11 @@ function fridge(g, w, d) {
     return;
   }
   g.add(box(0.006, 1.85, 0.01, M.black, 0, 0, d / 2 + 0.003));
-  for (const x of [-0.04, 0.04]) g.add(box(0.02, 0.5, 0.03, M.black, x, 1.1, d / 2 + 0.01));
+  g.add(box(w, 0.006, 0.01, M.black, 0, 0.95, d / 2 + 0.003));
+  for (const x of [-0.04, 0.04]) {
+    g.add(box(0.02, 0.45, 0.03, M.black, x, 1.15, d / 2 + 0.01));
+    g.add(box(0.02, 0.3, 0.03, M.black, x, 0.55, d / 2 + 0.01));
+  }
 }
 
 function toilet(g) {
@@ -267,7 +289,7 @@ export function buildFurniture() {
   // 客厅
   rug(g, [-1.2, 2.7, 0.6, 4.9]);
   place(g, [0.75, 2.7, 1.597, 4.9], 'west', sofa);
-  place(g, [-1.803, 2.85, -1.38, 4.75], 'east', tvWall);
+  place(g, [-1.803, 0.72, -1.403, 6.02], 'east', tvCabinetWall(-0.43));
   place(g, [-0.6, 3.5, 0.0, 4.1], 'south', (gg) => {
     gg.add(cyl(0.3, 0.3, 0.04, M.white, 0, 0.38));
     gg.add(cyl(0.04, 0.12, 0.38, M.white));
@@ -275,7 +297,6 @@ export function buildFurniture() {
   const armchair = place(g, [-1.0, 5.1, -0.3, 5.75], 'north', lounge);
   armchair.rotation.y = Math.PI * 0.8;
   place(g, [1.2, 5.0, 1.45, 5.25], 'south', floorLamp);
-  place(g, [-1.78, 5.65, -1.48, 6.0], 'south', plant);
 
   // 卫生间与过道洗手台
   place(g, [1.797, -0.73, 2.597, 0.87], 'east', shower);
@@ -289,11 +310,11 @@ export function buildFurniture() {
   place(g, [6.65, -0.1, 7.1, 0.35], 'east', chair);
   place(g, [4.897, -1.2, 5.017, -0.4], 'east', acIndoor);
 
-  // 主卧室
-  place(g, [6.1, 1.52, 7.67, 2.12], 'south', wardrobe());
-  place(g, [5.65, 2.6, 7.67, 4.4], 'west', bed(M.duvet));
-  place(g, [7.2, 2.15, 7.65, 2.55], 'west', nightstand);
-  place(g, [7.2, 4.45, 7.65, 4.85], 'west', nightstand);
+  // 主卧室，北侧为衣帽间（隔断在 layout.js）
+  place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
+  place(g, [7.147, 2.07, 7.697, 2.78], 'west', wardrobe(2.4));
+  place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
+  place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
   place(g, [4.697, 3.1, 4.817, 3.9], 'east', acIndoor);
 
   // 次卧

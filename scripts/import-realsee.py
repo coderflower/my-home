@@ -33,6 +33,12 @@ ROOMS = {
     '阳台': ('balcony', '阳台', 'outdoor'),
 }
 PRIVATE = {'bath', 'kids', 'master', 'bedroom'}
+# 装修新增的墙（VR 和 CAD 里都没有），坐标为校正后的最终坐标
+ADDED_WALLS = [
+    # 主卧衣帽间：轻钢龙骨隔断，西端与儿童房墙垛之间留 0.6 米入口，朝床一侧开窗
+    {'a': [5.997, 2.83], 'b': [7.697, 2.83], 't': 0.1, 'height': 2.7, 'exterior': False,
+     'openings': [{'from': 0.45, 'to': 1.35, 'type': 'window', 'sill': 0.9, 'head': 2.1}]},
+]
 CAD_WALLS = Path(__file__).resolve().parent.parent / 'vr' / 'cad-walls.json'
 
 
@@ -242,6 +248,7 @@ def main(src, out):
         for room in rooms:
             cal.room(room)
 
+    walls.extend(ADDED_WALLS)
     height = max(w['height'] for w in walls)
     lines_out = [
         '// 由 scripts/import-realsee.py 从如视 VR 户型数据生成，不要手改。',

@@ -68,4 +68,5 @@ export const walls = [
   {"a": [-1.484, -0.58], "b": [-0.052, -0.87], "t": 0.121, "height": 2.7, "exterior": false, "openings": [{"from": 0.04, "to": 1.436, "type": "opening", "head": 2}]},
   {"a": [1.697, -0.87], "b": [-0.052, -0.87], "t": 0.12, "height": 2.7, "exterior": false, "openings": [{"from": 0.057, "to": 1.692, "type": "opening", "head": 2}]},
   {"a": [4.647, 5.32], "b": [4.647, 2.02], "t": 0.1, "height": 2.7, "exterior": false, "openings": []},
+  {"a": [5.997, 2.83], "b": [7.697, 2.83], "t": 0.1, "height": 2.7, "exterior": false, "openings": [{"from": 0.45, "to": 1.35, "type": "window", "sill": 0.9, "head": 2.1}]},
 ];
