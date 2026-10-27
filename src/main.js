@@ -4,7 +4,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 import { rooms } from './layout.js';
 import { roomCenter, roomBounds } from './geometry.js';
 import { buildHouse, setHouseColors } from './house.js';
-import { buildFurniture, screenMaterial, sharedMaterials, lampMaterials, STYLES, BAY_PLANS } from './furniture.js';
+import { buildFurniture, screenMaterial, sharedMaterials, lampMaterials, STYLES, PLANS } from './furniture.js';
 import { buildLights, FIXTURES, SCENES } from './lights.js';
 import './style.css';
 
@@ -14,9 +14,16 @@ const LOW_CUT = 1.05;
 const PLAN_IMAGE = { src: 'floorplan.png', pxPerMeter: 44, origin: [384, 511] };
 
 const settings = Object.assign(
-  { wallMode: 'auto', night: false, labels: true, plan: false, style: STYLES[0].id, bayPlan: 'side', brightness: 80, temperature: 3500 },
+  { wallMode: 'auto', night: false, labels: true, plan: false, style: STYLES[0].id, plans: {}, brightness: 80, temperature: 3500 },
   loadSettings(),
 );
+if (settings.bayPlan) {
+  settings.plans = { ...settings.plans, masterBay: settings.bayPlan };
+  delete settings.bayPlan;
+}
+for (const plan of PLANS) {
+  if (!plan.options.some((o) => o.id === settings.plans[plan.id])) settings.plans[plan.id] = plan.default;
+}
 // 旧版按房间记录灯光，换成按灯具记录后重置为「回家」场景
 if (settings.lightsVersion !== 2) {
   settings.lights = Object.fromEntries(SCENES.home.on.map((id) => [id, true]));
@@ -85,7 +92,7 @@ function applyStyle() {
       }
     });
   }
-  furniture = buildFurniture(settings.style, settings.bayPlan);
+  furniture = buildFurniture(settings.style, settings.plans);
   scene.add(furniture);
   setHouseColors(STYLES.find((s) => s.id === settings.style) ?? STYLES[0]);
 }
@@ -380,8 +387,8 @@ const buttons = {
   lights: document.getElementById('btn-lights'),
 };
 const wallButtons = document.querySelectorAll('[data-wall]');
+const styleBar = document.getElementById('style-bar');
 const styleList = document.getElementById('style-list');
-const bayList = document.getElementById('bay-list');
 const lightList = document.getElementById('light-list');
 const sceneBar = document.getElementById('scene-bar');
 const brightnessInput = document.getElementById('brightness');
@@ -429,19 +436,26 @@ for (const s of STYLES) {
   styleList.appendChild(btn);
 }
 
-for (const plan of BAY_PLANS) {
-  const btn = document.createElement('button');
-  btn.className = 'text-btn';
-  btn.dataset.plan = plan.id;
-  btn.textContent = plan.name;
-  btn.addEventListener('click', () => {
-    settings.bayPlan = plan.id;
-    saveSettings();
-    applyStyle();
-    focusRoom('master');
-    syncUi();
-  });
-  bayList.appendChild(btn);
+for (const plan of PLANS) {
+  const row = document.createElement('div');
+  row.className = 'seg';
+  row.innerHTML = `<span>${plan.name}</span><div class="seg-btns" data-plan="${plan.id}" aria-label="${plan.name}方案"></div>`;
+  const list = row.querySelector('.seg-btns');
+  for (const option of plan.options) {
+    const btn = document.createElement('button');
+    btn.className = 'text-btn';
+    btn.dataset.option = option.id;
+    btn.textContent = option.name;
+    btn.addEventListener('click', () => {
+      settings.plans[plan.id] = option.id;
+      saveSettings();
+      applyStyle();
+      focusRoom(plan.room);
+      syncUi();
+    });
+    list.appendChild(btn);
+  }
+  styleBar.appendChild(row);
 }
 
 buttons.view3d.addEventListener('click', () => flyTo(...defaultView()));
@@ -488,7 +502,9 @@ function syncUi() {
   buttons.plan.classList.toggle('on', settings.plan);
   for (const btn of wallButtons) btn.classList.toggle('on', btn.dataset.wall === settings.wallMode);
   for (const btn of styleList.children) btn.classList.toggle('on', btn.dataset.style === settings.style);
-  for (const btn of bayList.children) btn.classList.toggle('on', btn.dataset.plan === settings.bayPlan);
+  for (const list of styleBar.querySelectorAll('[data-plan]')) {
+    for (const btn of list.children) btn.classList.toggle('on', btn.dataset.option === settings.plans[list.dataset.plan]);
+  }
   for (const li of roomList.children) {
     const on = FIXTURES.some((f) => f.room === li.dataset.room && settings.lights[f.id]);
     li.querySelector('.light-btn')?.classList.toggle('on', on);

@@ -536,20 +536,167 @@ function longDesk(work) {
   };
 }
 
-// 儿童房床尾书桌：靠床尾 1.2 米桌下做开放格（床尾空间开不了门），其余为工位
-function kidsDesk(g, w, d) {
-  g.add(box(w, 0.035, d, M.walnut, 0, 0.715));
-  const x1 = -w / 2 + 1.2;
-  for (const x of [-w / 2 + 0.015, -w / 2 + 0.6, x1 - 0.015]) g.add(box(0.03, 0.715, d - 0.02, M.cabinet, x, 0, -0.01));
-  for (const y of [0, 0.35]) g.add(box(1.2, 0.02, d - 0.02, M.cabinet, -w / 2 + 0.6, y, -0.01));
-  books(g, -w / 2 + 0.06, -w / 2 + 0.5, 0.37, -0.05, 0.2);
-  g.add(box(0.45, 0.28, 0.4, M.mustard, x1 - 0.3, 0.02, 0));
-  g.add(box(0.45, 0.25, 0.4, M.sage, x1 - 0.3, 0.37, 0));
-  g.add(box(0.04, 0.715, d - 0.04, M.cabinet, w / 2 - 0.03, 0, -0.01));
-  g.add(box(0.32, 0.015, 0.22, M.metal, x1 + 0.35, 0.75, 0.05));
-  g.add(cyl(0.06, 0.07, 0.02, M.brass, w / 2 - 0.15, 0.75, -d / 2 + 0.12));
-  g.add(cyl(0.008, 0.008, 0.3, M.brass, w / 2 - 0.15, 0.77, -d / 2 + 0.12));
-  g.add(cyl(0.05, 0.09, 0.1, M.cream, w / 2 - 0.15, 1.05, -d / 2 + 0.12));
+// 儿童书桌：top 为桌面高度；cubby 为一端桌下开放格的长度（0 表示不做），开放格一端在局部 -x
+function studyDesk(top, cubby = 0) {
+  return (g, w, d) => {
+    const h = top - 0.035;
+    g.add(box(w, 0.035, d, M.walnut, 0, h));
+    const x1 = -w / 2 + cubby;
+    if (cubby) {
+      for (const x of [-w / 2 + 0.015, -w / 2 + cubby / 2, x1 - 0.015]) g.add(box(0.03, h, d - 0.02, M.cabinet, x, 0, -0.01));
+      for (const y of [0, h / 2]) g.add(box(cubby, 0.02, d - 0.02, M.cabinet, -w / 2 + cubby / 2, y, -0.01));
+      books(g, -w / 2 + 0.06, -w / 2 + cubby / 2 - 0.08, h / 2 + 0.02, -0.05, 0.2);
+      const bin = Math.min(0.25, h / 2 - 0.06);
+      g.add(box(cubby / 2 - 0.12, bin, 0.4, M.mustard, x1 - cubby / 4, 0.02, 0));
+      g.add(box(cubby / 2 - 0.12, bin, 0.4, M.sage, x1 - cubby / 4, h / 2 + 0.02, 0));
+    } else {
+      g.add(box(0.04, h, d - 0.04, M.cabinet, -w / 2 + 0.03, 0, -0.01));
+    }
+    g.add(box(0.04, h, d - 0.04, M.cabinet, w / 2 - 0.03, 0, -0.01));
+    const pad = (x1 + w / 2) / 2;
+    g.add(box(0.3, 0.01, 0.22, M.cream, pad, top, 0.05));
+    g.add(cyl(0.035, 0.035, 0.1, M.pot, pad + 0.24, top, -0.05, 12));
+    g.add(cyl(0.06, 0.07, 0.02, M.brass, w / 2 - 0.15, top, -d / 2 + 0.12));
+    g.add(cyl(0.008, 0.008, 0.3, M.brass, w / 2 - 0.15, top + 0.02, -d / 2 + 0.12));
+    g.add(cyl(0.05, 0.09, 0.1, M.cream, w / 2 - 0.15, top + 0.3, -d / 2 + 0.12));
+  };
+}
+
+// 护栏：从局部 (x0, z0) 到 (x1, z1)，y0 为底部高度
+function rail(g, [x0, z0], [x1, z1], y0, h = 0.3) {
+  const len = Math.hypot(x1 - x0, z1 - z0);
+  const bar = box(len, 0.03, 0.03, M.wood);
+  bar.position.set((x0 + x1) / 2, y0 + h, (z0 + z1) / 2);
+  bar.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
+  g.add(bar);
+  const n = Math.max(1, Math.round(len / 0.15));
+  for (let i = 0; i <= n; i++) g.add(box(0.02, h, 0.02, M.wood, x0 + ((x1 - x0) * i) / n, y0, z0 + ((z1 - z0) * i) / n));
+}
+
+// 床垫 + 被子 + 枕头，床头在局部 -z
+function bedding(g, w, d, y0) {
+  g.add(box(w - 0.04, 0.16, d - 0.04, M.linen, 0, y0));
+  g.add(box(w - 0.02, 0.05, d * 0.62, M.kidDuvet, 0, y0 + 0.16, d * 0.17));
+  g.add(box(Math.min(0.6, w / 2), 0.1, 0.35, M.pillow, 0, y0 + 0.16, -d / 2 + 0.25));
+}
+
+// 蒙氏房子床：床垫直接落在矮床框上，四角立柱 + 人字形屋顶
+function houseBed(g, w, d) {
+  g.add(box(w, 0.08, d, M.wood));
+  bedding(g, w, d, 0.08);
+  const H = 1.25;
+  const rise = 0.35;
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(0.05, H, 0.05, M.wood, sx * (w / 2 - 0.025), 0, sz * (d / 2 - 0.025)));
+  const len = Math.hypot(w / 2, rise);
+  for (const sz of [-1, 1]) {
+    for (const sx of [-1, 1]) {
+      const rafter = box(len, 0.04, 0.04, M.wood);
+      rafter.position.set((sx * w) / 4, H + rise / 2, sz * (d / 2 - 0.025));
+      rafter.rotation.z = -sx * Math.atan2(rise, w / 2);
+      g.add(rafter);
+    }
+  }
+  g.add(box(0.04, 0.04, d, M.wood, 0, H + rise - 0.04));
+}
+
+// 矮开放架：两层格子，下层玩具筐，上层绘本和玩偶
+function lowShelf(g, w, d) {
+  const H = 0.75;
+  for (const y of [0, H / 2, H - 0.02]) g.add(box(w, 0.02, d, M.cabinet, 0, y));
+  const n = Math.max(1, Math.round(w / 0.4));
+  const cw = w / n;
+  for (let i = 0; i <= n; i++) g.add(box(0.02, H, d, M.cabinet, -w / 2 + cw * i, 0));
+  for (let i = 0; i < n; i++) {
+    const x = -w / 2 + cw * (i + 0.5);
+    g.add(box(cw - 0.08, 0.22, d - 0.06, [M.mustard, M.sage, M.sofa][i % 3], x, 0.03, 0));
+    if (i % 2) g.add(sphere(0.09, M.pot, x, H / 2 + 0.11, 0));
+    else books(g, x - cw / 2 + 0.04, x + cw / 2 - 0.04, H / 2 + 0.02, 0, d * 0.6);
+  }
+}
+
+// 封面朝外的绘本架：后倾背板 + 三层挡条
+function bookRack(g, w, d) {
+  const back = box(w, 0.8, 0.02, M.wood, 0, 0, -d / 2 + 0.05);
+  back.rotation.x = -0.15;
+  g.add(back);
+  for (const sx of [-1, 1]) g.add(box(0.02, 0.8, d, M.wood, (sx * (w - 0.02)) / 2, 0));
+  const covers = [M.mustard, M.sage, M.sofa, M.cream];
+  for (const [i, y] of [0.05, 0.3, 0.55].entries()) {
+    g.add(box(w, 0.06, 0.02, M.wood, 0, y, d / 2 - 0.02));
+    const cover = box(w * 0.6, 0.2, 0.01, covers[i], 0, y + 0.02, d / 2 - 0.08 - i * 0.04);
+    cover.rotation.x = -0.15;
+    g.add(cover);
+  }
+}
+
+function beanbag(g, w) {
+  const bag = new THREE.Mesh(new THREE.SphereGeometry(w / 2, 24, 16), M.mustard);
+  bag.scale.set(1, 0.6, 1);
+  bag.position.y = w * 0.27;
+  bag.castShadow = true;
+  g.add(bag);
+}
+
+// 全宽地台：0.35 米高、台下整排抽屉；西侧 2 米铺床垫，东侧为靠窗阅读垫
+function platformBed(g, w, d) {
+  cabinetDoors(g, -w / 2, w / 2, 0.02, 0.29, d, 0.56, M.cabinet, 0.2);
+  g.add(box(w, 0.04, d, M.wood, 0, 0.31));
+  const bed = new THREE.Group();
+  bed.position.set(-w / 2 + 1.0, 0.35, 0);
+  bed.rotation.y = -Math.PI / 2;
+  bedding(bed, d - 0.04, 1.96, 0);
+  g.add(bed);
+  g.add(box(0.7, 0.08, d - 0.1, M.sage, w / 2 - 0.4, 0.35));
+  for (const x of [w / 2 - 0.58, w / 2 - 0.22]) {
+    const pillow = box(0.32, 0.28, 0.12, M.mustard, x, 0.43, -d / 2 + 0.12);
+    pillow.rotation.x = -0.2;
+    g.add(pillow);
+  }
+  books(g, w / 2 - 0.3, w / 2 - 0.1, 0.43, d / 2 - 0.2, 0.15);
+}
+
+// 半高床：床板离地 1.1 米，床尾留 0.2 米平台接梯柜；床下西半为游戏屋（布帘），床头在局部 -z
+function loftBed(g, w, d) {
+  const H = 1.1;
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(0.06, H + 0.45, 0.06, M.wood, sx * (w / 2 - 0.03), 0, sz * (d / 2 - 0.03)));
+  g.add(box(w, 0.08, d, M.wood, 0, H - 0.08));
+  const mattress = new THREE.Group();
+  mattress.position.set(0, 0, -d / 2 + 1.0);
+  bedding(mattress, w, 2.0, H);
+  g.add(mattress);
+  const y0 = H + 0.14;
+  rail(g, [w / 2 - 0.02, -d / 2], [w / 2 - 0.02, d / 2 - 0.5], y0);
+  rail(g, [-w / 2 + 0.02, -d / 2], [-w / 2 + 0.02, d / 2], y0);
+  rail(g, [-w / 2, -d / 2 + 0.02], [w / 2, -d / 2 + 0.02], y0);
+  rail(g, [-w / 2, d / 2 - 0.02], [0, d / 2 - 0.02], y0);
+  g.add(box(w - 0.12, 0.03, 1.1, M.sage, 0, 0, -d / 2 + 0.6));
+  g.add(box(0.02, H - 0.1, 1.1, M.mustard, -w / 2 + 0.03, 0.02, -d / 2 + 0.6));
+  g.add(sphere(0.12, M.pot, 0.1, 0.15, -d / 2 + 0.5));
+}
+
+// 梯柜：四级台阶向局部 -z 升高，每级踢面是一个抽屉
+function stairCabinet(g, w, d) {
+  const steps = 4;
+  const run = d / steps;
+  const rise = 1.08 / steps;
+  for (let i = 0; i < steps; i++) {
+    const z = d / 2 - run * (i + 0.5);
+    const h = rise * (i + 1);
+    g.add(box(w, h - 0.03, run, M.cabinet, 0, 0, z));
+    g.add(box(w, 0.03, run, M.wood, 0, h - 0.03, z));
+    g.add(handle(0, rise * i + rise / 2, d / 2 - run * i));
+  }
+}
+
+// 子母床：上层 1.2 米床带护栏，下层整张拖床收在床下（侧面为拖床面板和拉手）；床头在局部 -z
+function trundleBed(g, w, d) {
+  g.add(box(w, 0.26, d, M.cabinet, 0, 0.03));
+  g.add(box(0.02, 0.22, d - 0.2, M.walnut, -w / 2 - 0.01, 0.05));
+  for (const z of [-d / 4, d / 4]) g.add(box(0.03, 0.03, 0.3, M.brass, -w / 2 - 0.03, 0.18, z));
+  g.add(box(w, 0.08, d, M.walnut, 0, 0.3));
+  bedding(g, w, d, 0.38);
+  g.add(box(w + 0.04, 0.95, 0.06, M.walnut, 0, 0, -d / 2 + 0.03));
+  rail(g, [-w / 2 + 0.02, -d / 2 + 0.1], [-w / 2 + 0.02, d / 2 - 0.7], 0.58);
 }
 
 // 抬高窗台：0.45 米高木台 + 坐垫靠枕，台下抽屉
@@ -594,12 +741,27 @@ function rug(parent, [x1, z1, x2, z2]) {
   parent.add(mesh);
 }
 
-// 主卧南侧内凹（宽 2.1 米、深 0.8 米的落地窗）的书桌方案
-export const BAY_PLANS = [
-  { id: 'none', name: '不做' },
-  { id: 'long', name: '通长书桌' },
-  { id: 'side', name: '侧墙书桌' },
-  { id: 'seat', name: '窗台+书桌' },
+// 可切换的局部方案：主卧南侧内凹（宽 2.1 米、深 0.8 米的落地窗）书桌、儿童房整体布局
+export const PLANS = [
+  {
+    id: 'masterBay', name: '主卧飘窗', room: 'master', default: 'side',
+    options: [
+      { id: 'none', name: '不做' },
+      { id: 'long', name: '通长书桌' },
+      { id: 'side', name: '侧墙书桌' },
+      { id: 'seat', name: '窗台+书桌' },
+    ],
+  },
+  {
+    id: 'kids', name: '儿童房', room: 'kids', default: 'grow',
+    options: [
+      { id: 'grow', name: '成长型' },
+      { id: 'montessori', name: '蒙氏地床' },
+      { id: 'platform', name: '全宽地台' },
+      { id: 'loft', name: '半高床' },
+      { id: 'trundle', name: '子母床' },
+    ],
+  },
 ];
 
 function masterBay(g, plan) {
@@ -622,7 +784,42 @@ function masterBay(g, plan) {
   }
 }
 
-export function buildFurniture(styleId, bayPlan = 'side') {
+// 儿童房：房门在西南角向内开，东南凹位为衣柜（门前留 0.6 米），北面整面落地窗
+function kidsRoom(g, plan) {
+  const kidChair = (rect, facing) => place(g, rect, facing, chair).scale.setScalar(0.7);
+  place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
+  if (plan === 'montessori') {
+    place(g, [4.95, -1.6, 6.95, -0.4], 'east', houseBed);
+    place(g, [7.397, -1.63, 7.697, 0.33], 'west', lowShelf);
+    place(g, [4.897, -0.38, 5.197, 0.07], 'east', bookRack);
+    place(g, [5.22, -0.38, 5.62, 0.02], 'south', beanbag);
+    place(g, [6.05, -0.25, 6.65, 0.35], 'south', table(0.5, M.walnut));
+    kidChair([5.68, -0.12, 6.03, 0.22], 'east');
+    kidChair([6.67, -0.12, 7.02, 0.22], 'west');
+  } else if (plan === 'platform') {
+    place(g, [4.897, -1.63, 7.697, -0.43], 'south', platformBed);
+    place(g, [7.097, -0.43, 7.697, 0.33], 'west', studyDesk(0.55));
+    place(g, [7.447, -0.43, 7.697, 0.33], 'west', wallShelves);
+    kidChair([6.65, -0.2, 7.0, 0.15], 'east');
+  } else if (plan === 'loft') {
+    place(g, [4.9, -1.63, 7.097, -0.43], 'east', loftBed);
+    place(g, [7.097, -1.63, 7.697, -0.43], 'south', stairCabinet);
+    place(g, [5.9, -1.6, 6.8, -1.1], 'south', table(0.5, M.walnut));
+    kidChair([6.18, -1.05, 6.53, -0.7], 'north');
+  } else {
+    if (plan === 'trundle') {
+      place(g, [4.9, -1.63, 6.9, -0.43], 'east', trundleBed);
+    } else {
+      place(g, [4.9, -1.63, 6.9, -0.43], 'east', bed(M.kidDuvet));
+      place(g, [5.2, -0.46, 6.4, -0.44], 'south', (gg, w) => rail(gg, [-w / 2, 0], [w / 2, 0], 0.52));
+    }
+    place(g, [7.097, -1.63, 7.697, 0.33], 'west', studyDesk(0.55, 1.2));
+    place(g, [7.447, -1.63, 7.697, 0.33], 'west', wallShelves);
+    kidChair([6.65, -0.15, 7.0, 0.2], 'east');
+  }
+}
+
+export function buildFurniture(styleId, plans = {}) {
   applyStyle(styleId);
   const g = new THREE.Group();
 
@@ -666,12 +863,7 @@ export function buildFurniture(styleId, bayPlan = 'side') {
   place(g, [2.95, -0.73, 3.4, -0.24], 'south', toilet);
   place(g, [3.797, -0.73, 4.797, -0.23], 'south', vanity);
 
-  // 儿童房：东墙通长书桌，床尾段桌下为开放格，桌上方开放搁板；南侧凹位衣柜门前留 0.6 米
-  place(g, [4.9, -1.63, 6.9, -0.43], 'east', bed(M.kidDuvet));
-  place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
-  place(g, [7.097, -1.63, 7.697, 0.33], 'west', kidsDesk);
-  place(g, [7.447, -1.63, 7.697, 0.33], 'west', wallShelves);
-  place(g, [6.55, -0.2, 7.0, 0.25], 'east', chair);
+  kidsRoom(g, plans.kids);
 
   // 主卧室，北侧为衣帽间（隔断在 layout.js）
   place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
@@ -679,7 +871,7 @@ export function buildFurniture(styleId, bayPlan = 'side') {
   place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', tableLamp(0.52, lampMaterials.masterBedside));
-  masterBay(g, bayPlan);
+  masterBay(g, plans.masterBay);
 
   // 次卧
   place(g, [2.9, 2.22, 4.59, 2.82], 'south', wardrobe());
