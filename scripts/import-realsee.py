@@ -34,7 +34,7 @@ ROOMS = {
 }
 PRIVATE = {'bath', 'kids', 'master', 'bedroom'}
 # 门扇默认铰链在洞口起点一侧，这里按房间改到另一侧
-HINGE_AT_END = {'bedroom'}
+HINGE_AT_END = {'bedroom', 'kids'}
 # 装修拆除的内墙：两侧房间为这些组合时整段墙不建
 REMOVED_BETWEEN = [{'entry', 'living'}]
 # 装修新增的墙（VR 和 CAD 里都没有），坐标为校正后的最终坐标
