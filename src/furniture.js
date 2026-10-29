@@ -562,6 +562,40 @@ function studyDesk(top, cubby = 0) {
   };
 }
 
+// 拐角书桌：桌面 0.8 米、局部 +x 前角做圆角；上方为圆角开放格 + 0.28 米深玻璃吊柜（高 1 米）
+function cornerDesk(g, w, d) {
+  const r = 0.25;
+  const shape = new THREE.Shape();
+  shape.moveTo(-w / 2, d / 2);
+  shape.lineTo(w / 2, d / 2);
+  shape.lineTo(w / 2, -d / 2 + r);
+  shape.absarc(w / 2 - r, -d / 2 + r, r, 0, -Math.PI / 2, true);
+  shape.lineTo(-w / 2, -d / 2);
+  shape.closePath();
+  const top = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 0.035, bevelEnabled: false, curveSegments: 16 }), M.cream);
+  top.rotation.x = -Math.PI / 2;
+  top.position.y = 0.765;
+  top.castShadow = top.receiveShadow = true;
+  g.add(top);
+  g.add(box(0.03, 0.765, d - 0.02, M.cream, -w / 2 + 0.015, 0, -0.01));
+  g.add(box(0.03, 0.765, d - r - 0.02, M.cream, w / 2 - 0.015, 0, -r / 2 - 0.01));
+  g.add(box(w, 0.4, 0.02, M.cream, 0, 0.365, -d / 2 + 0.01));
+
+  const back = -d / 2 + 0.14;
+  for (const y of [1.2, 1.38]) g.add(box(w, 0.02, 0.28, M.cream, 0, y, back));
+  for (const x of [-w / 2 + 0.01, w / 2 - 0.01]) g.add(box(0.02, 0.2, 0.28, M.cream, x, 1.2, back));
+  books(g, w / 2 - 0.4, w / 2 - 0.1, 1.22, back, 0.2);
+  g.add(box(w, 1.0, 0.26, M.cream, 0, 1.4, back - 0.01));
+  for (const sx of [-1, 1]) g.add(box(w / 2 - 0.01, 0.98, 0.01, M.glass, (sx * w) / 4, 1.41, back + 0.135));
+  g.add(box(w - 0.04, 0.02, 0.22, M.walnut, 0, 1.88, back));
+  books(g, -w / 2 + 0.06, -w / 2 + 0.4, 1.9, back, 0.18);
+
+  g.add(box(0.32, 0.01, 0.22, M.black, -0.1, 0.8, 0.05));
+  g.add(cyl(0.06, 0.07, 0.02, M.brass, w / 2 - 0.3, 0.8, -d / 2 + 0.12));
+  g.add(cyl(0.008, 0.008, 0.3, M.brass, w / 2 - 0.3, 0.82, -d / 2 + 0.12));
+  g.add(cyl(0.05, 0.09, 0.1, M.cream, w / 2 - 0.3, 1.1, -d / 2 + 0.12));
+}
+
 // 护栏：从局部 (x0, z0) 到 (x1, z1)，y0 为底部高度
 function rail(g, [x0, z0], [x1, z1], y0, h = 0.3) {
   const len = Math.hypot(x1 - x0, z1 - z0);
@@ -790,12 +824,11 @@ function kidsRoom(g, plan) {
   place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
   if (plan === 'montessori') {
     place(g, [4.95, -1.6, 6.95, -0.4], 'east', houseBed);
-    place(g, [7.397, -1.6, 7.697, -0.4], 'west', lowShelf);
+    place(g, [7.397, -1.6, 7.697, -0.79], 'west', lowShelf);
     place(g, [4.897, -0.38, 5.197, 0.07], 'east', bookRack);
     place(g, [5.22, -0.38, 5.62, 0.02], 'south', beanbag);
-    place(g, [7.097, -0.4, 7.697, 0.33], 'west', studyDesk(0.55));
-    place(g, [7.447, -0.4, 7.697, 0.33], 'west', wallShelves);
-    kidChair([6.65, -0.2, 7.0, 0.15], 'east');
+    place(g, [7.147, -0.79, 7.697, 0.33], 'west', cornerDesk);
+    place(g, [6.62, -0.35, 7.07, 0.1], 'east', chair);
   } else if (plan === 'platform') {
     place(g, [4.897, -1.63, 7.697, -0.43], 'south', platformBed);
     place(g, [7.097, -0.43, 7.697, 0.33], 'west', studyDesk(0.55));
