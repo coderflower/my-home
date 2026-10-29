@@ -790,12 +790,12 @@ function kidsRoom(g, plan) {
   place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
   if (plan === 'montessori') {
     place(g, [4.95, -1.6, 6.95, -0.4], 'east', houseBed);
-    place(g, [7.397, -1.63, 7.697, 0.33], 'west', lowShelf);
+    place(g, [7.397, -1.6, 7.697, -0.4], 'west', lowShelf);
     place(g, [4.897, -0.38, 5.197, 0.07], 'east', bookRack);
     place(g, [5.22, -0.38, 5.62, 0.02], 'south', beanbag);
-    place(g, [6.05, -0.25, 6.65, 0.35], 'south', table(0.5, M.walnut));
-    kidChair([5.68, -0.12, 6.03, 0.22], 'east');
-    kidChair([6.67, -0.12, 7.02, 0.22], 'west');
+    place(g, [7.097, -0.4, 7.697, 0.33], 'west', studyDesk(0.55));
+    place(g, [7.447, -0.4, 7.697, 0.33], 'west', wallShelves);
+    kidChair([6.65, -0.2, 7.0, 0.15], 'east');
   } else if (plan === 'platform') {
     place(g, [4.897, -1.63, 7.697, -0.43], 'south', platformBed);
     place(g, [7.097, -0.43, 7.697, 0.33], 'west', studyDesk(0.55));
