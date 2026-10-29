@@ -562,7 +562,7 @@ function studyDesk(top, cubby = 0) {
   };
 }
 
-// 拐角书桌：桌面 0.8 米，局部 +x 端贴衣柜侧板、-x 前角做圆角；上方为开放格 + 0.28 米深玻璃吊柜（高 1 米）
+// 衣柜连体书桌：桌面 0.8 米，局部 +x 端伸进衣柜末节，-x 前角做圆角过渡到床尾柜
 function cornerDesk(g, w, d) {
   const r = 0.25;
   const shape = new THREE.Shape();
@@ -577,23 +577,36 @@ function cornerDesk(g, w, d) {
   top.position.y = 0.765;
   top.castShadow = top.receiveShadow = true;
   g.add(top);
-  g.add(box(0.03, 0.765, d - 0.02, M.cream, w / 2 - 0.015, 0, -0.01));
   g.add(box(0.03, 0.765, d - r - 0.02, M.cream, -w / 2 + 0.015, 0, -r / 2 - 0.01));
   g.add(box(w, 0.4, 0.02, M.cream, 0, 0.365, -d / 2 + 0.01));
+  g.add(box(0.32, 0.01, 0.22, M.black, -w / 2 + 0.6, 0.8, 0.05));
+  g.add(cyl(0.06, 0.07, 0.02, M.brass, w / 2 - 0.75, 0.8, -d / 2 + 0.12));
+  g.add(cyl(0.008, 0.008, 0.3, M.brass, w / 2 - 0.75, 0.82, -d / 2 + 0.12));
+  g.add(cyl(0.05, 0.09, 0.1, M.cream, w / 2 - 0.75, 1.1, -d / 2 + 0.12));
+}
 
-  const back = -d / 2 + 0.14;
-  for (const y of [1.2, 1.38]) g.add(box(w, 0.02, 0.28, M.cream, 0, y, back));
-  for (const x of [-w / 2 + 0.01, w / 2 - 0.01]) g.add(box(0.02, 0.2, 0.28, M.cream, x, 1.2, back));
-  books(g, w / 2 - 0.4, w / 2 - 0.1, 1.22, back, 0.2);
-  g.add(box(w, 1.0, 0.26, M.cream, 0, 1.4, back - 0.01));
-  for (const sx of [-1, 1]) g.add(box(w / 2 - 0.01, 0.98, 0.01, M.glass, (sx * w) / 4, 1.41, back + 0.135));
-  g.add(box(w - 0.04, 0.02, 0.22, M.walnut, 0, 1.88, back));
-  books(g, -w / 2 + 0.06, -w / 2 + 0.4, 1.9, back, 0.18);
+// 书桌上方吊柜：1.3–1.5 米为开放格，上接玻璃门柜，顶与衣柜齐平（2.3 米）
+function deskHutch(g, w, d) {
+  for (const y of [1.3, 1.48]) g.add(box(w, 0.02, d, M.cream, 0, y));
+  for (const x of [-w / 2 + 0.01, w / 2 - 0.01]) g.add(box(0.02, 0.2, d, M.cream, x, 1.3));
+  books(g, -w / 2 + 0.1, -w / 2 + 0.4, 1.32, 0, d * 0.7);
+  g.add(box(w, 0.8, d - 0.02, M.cream, 0, 1.5, -0.01));
+  for (const sx of [-1, 1]) g.add(box(w / 2 - 0.01, 0.78, 0.01, M.glass, (sx * w) / 4, 1.51, d / 2 + 0.005));
+  g.add(box(w - 0.04, 0.02, d - 0.06, M.walnut, 0, 1.88, -0.01));
+  books(g, w / 2 - 0.45, w / 2 - 0.1, 1.9, -0.01, d * 0.6);
+}
 
-  g.add(box(0.32, 0.01, 0.22, M.black, -w / 2 + 0.4, 0.8, 0.05));
-  g.add(cyl(0.06, 0.07, 0.02, M.brass, w / 2 - 0.3, 0.8, -d / 2 + 0.12));
-  g.add(cyl(0.008, 0.008, 0.3, M.brass, w / 2 - 0.3, 0.82, -d / 2 + 0.12));
-  g.add(cyl(0.05, 0.09, 0.1, M.cream, w / 2 - 0.3, 1.1, -d / 2 + 0.12));
+// 衣柜末节分三段：下柜门、桌面高度的开放格（书桌桌面从这里穿入）、上柜门
+function wardrobeColumn(height = 2.3) {
+  return (g, w, d) => {
+    g.add(box(w, 0.08, d - 0.04, M.walnut, 0, 0, -0.02));
+    cabinetDoors(g, -w / 2, w / 2, 0.08, 0.68, d, 0.6);
+    g.add(box(w, 0.6, 0.02, M.cabinet, 0, 0.8, -d / 2 + 0.01));
+    for (const x of [-w / 2 + 0.01, w / 2 - 0.01]) g.add(box(0.02, 0.6, d, M.cabinet, x, 0.8));
+    g.add(box(w - 0.04, 0.02, d - 0.04, M.cabinet, 0, 1.1, -0.02));
+    books(g, -w / 2 + 0.06, w / 2 - 0.1, 1.12, -0.05, d * 0.6);
+    cabinetDoors(g, -w / 2, w / 2, 1.4, height - 1.4, d, 0.6);
+  };
 }
 
 // 护栏：从局部 (x0, z0) 到 (x1, z1)，y0 为底部高度
@@ -827,8 +840,10 @@ function kidsRoom(g, plan) {
     place(g, [7.397, -1.6, 7.697, -0.4], 'west', lowShelf);
     place(g, [4.897, -0.38, 5.197, 0.07], 'east', bookRack);
     place(g, [5.22, -0.38, 5.62, 0.02], 'south', beanbag);
-    place(g, [7.147, 0.3, 7.697, 1.42], 'west', cornerDesk);
-    place(g, [6.62, 0.3, 7.07, 0.75], 'east', chair);
+    place(g, [7.147, 0.92, 7.697, 1.42], 'north', wardrobeColumn());
+    place(g, [7.147, -0.4, 7.697, 1.42], 'west', cornerDesk);
+    place(g, [7.417, -0.4, 7.697, 0.92], 'west', deskHutch);
+    place(g, [6.62, -0.15, 7.07, 0.3], 'east', chair);
   } else if (plan === 'platform') {
     place(g, [4.897, -1.63, 7.697, -0.43], 'south', platformBed);
     place(g, [7.097, -0.43, 7.697, 0.33], 'west', studyDesk(0.55));
