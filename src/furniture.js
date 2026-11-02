@@ -185,19 +185,20 @@ function place(parent, rect, facing, builder) {
 }
 
 // 低床架；床头为竖条格栅或软包
-function bed(color) {
+// headboard 为 false 时不做床头板，用于靠床头背板柜摆放
+function bed(color, headboard = true) {
   return (g, w, d) => {
     g.add(box(w, 0.16, d, M.walnut, 0, 0.16));
     legs(g, w, d, 0.16, 0.08);
     g.add(box(w - 0.06, 0.22, d - 0.1, M.linen, 0, 0.3, 0.03));
     g.add(box(w - 0.02, 0.06, d * 0.68, color, 0, 0.52, d * 0.15));
-    if (style.slats) {
+    if (headboard && style.slats) {
       const slats = Math.round(w / 0.12);
       for (let i = 0; i < slats; i++) {
         g.add(box(w / slats - 0.02, 0.62, 0.05, M.walnut, -w / 2 + (w / slats) * (i + 0.5), 0.32, -d / 2 + 0.03));
       }
       g.add(box(w + 0.04, 0.04, 0.08, M.walnut, 0, 0.94, -d / 2 + 0.03));
-    } else {
+    } else if (headboard) {
       g.add(box(w + 0.04, 0.78, 0.12, M.cane, 0, 0.2, -d / 2 + 0.04));
     }
     const pillows = w > 1.3 ? [-w / 4, w / 4] : [0];
@@ -800,6 +801,13 @@ export const PLANS = [
     ],
   },
   {
+    id: 'masterBed', name: '主卧床头', room: 'master', default: 'plain',
+    options: [
+      { id: 'plain', name: '普通床头' },
+      { id: 'cabinet', name: '床头背板柜' },
+    ],
+  },
+  {
     id: 'kids', name: '儿童房', room: 'kids', default: 'grow',
     options: [
       { id: 'grow', name: '成长型' },
@@ -810,6 +818,18 @@ export const PLANS = [
     ],
   },
 ];
+
+// 床头背板柜：0.22 米深、1.25 米高，中段软包靠背，上段翻门柜，柜顶木搁板
+function headboardCabinet(g, w, d) {
+  g.add(box(w, 0.95, d, M.cabinet, 0, 0));
+  g.add(box(w - 0.1, 0.45, 0.05, M.linen, 0, 0.47, d / 2 + 0.025));
+  for (const x of [-w / 4, w / 4]) g.add(box(0.01, 0.43, 0.052, M.cabinet, x, 0.48, d / 2 + 0.025));
+  cabinetDoors(g, -w / 2, w / 2, 0.95, 0.27, d, 0.6, M.cabinet, 1.0);
+  g.add(box(w + 0.02, 0.03, d + 0.02, M.walnut, 0, 1.22));
+  books(g, -w / 2 + 0.1, -w / 2 + 0.45, 1.25, 0, d * 0.6);
+  g.add(cyl(0.05, 0.04, 0.12, M.pot, w / 2 - 0.2, 1.25, 0));
+  g.add(sphere(0.09, M.green, w / 2 - 0.2, 1.43, 0));
+}
 
 function masterBay(g, plan) {
   if (plan === 'long') {
@@ -916,7 +936,12 @@ export function buildFurniture(styleId, plans = {}) {
   // 主卧室，北侧为衣帽间（隔断在 layout.js）
   place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
   place(g, [7.147, 2.07, 7.697, 2.78], 'west', wardrobe(2.4));
-  place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
+  if (plans.masterBed === 'cabinet') {
+    place(g, [7.477, 2.88, 7.697, 4.72], 'west', headboardCabinet);
+    place(g, [5.457, 2.92, 7.477, 4.72], 'west', bed(M.duvet, false));
+  } else {
+    place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
+  }
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
   place(g, [7.2, 4.72, 7.65, 5.12], 'west', tableLamp(0.52, lampMaterials.masterBedside));
   masterBay(g, plans.masterBay);

@@ -231,10 +231,10 @@ body.night {
 }
 
 .light-panel {
-  top: 158px;
+  top: 194px;
   right: 16px;
   width: 240px;
-  max-height: calc(100% - 248px);
+  max-height: calc(100% - 284px);
   overflow-y: auto;
   padding: 12px;
   display: none;
@@ -444,7 +444,7 @@ svg {
   }
 
   .light-panel {
-    top: 200px;
+    top: 236px;
     left: 12px;
     right: 12px;
     width: auto;
@@ -452,11 +452,11 @@ svg {
   }
 
   .panel {
-    top: 200px;
+    top: 236px;
     left: 12px;
     right: 12px;
     width: auto;
-    max-height: calc(100% - 290px);
+    max-height: calc(100% - 326px);
     display: none;
   }
 
