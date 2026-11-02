@@ -606,10 +606,11 @@ function floorBed(g, w, d) {
   bedding(g, w, d, 0.08);
 }
 
-// 床头衣柜：下段 0.45 米封板当床头，0.45–0.9 米为床头开放格，上段柜门越过床垫开合
+// 床头衣柜：0.25 米以下藏在床垫后做踢脚，0.25–0.45 米为高出床垫的下翻门储物格，0.45–0.9 米为床头开放格，上段柜门越过床垫开合
 function bedWardrobe(height = 2.3) {
   return (g, w, d) => {
-    g.add(box(w, 0.45, d - 0.02, M.cabinet, 0, 0, -0.01));
+    g.add(box(w, 0.25, d - 0.04, M.cabinet, 0, 0, -0.02));
+    cabinetDoors(g, -w / 2, w / 2, 0.25, 0.2, d, 0.6, M.cabinet, 0.41);
     g.add(box(w, 0.45, 0.02, M.cabinet, 0, 0.45, -d / 2 + 0.01));
     for (const x of [-w / 2 + 0.01, w / 2 - 0.01]) g.add(box(0.02, 0.45, d, M.cabinet, x, 0.45));
     books(g, -w / 2 + 0.08, -w / 2 + 0.38, 0.47, -0.05, d * 0.6);
