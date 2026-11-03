@@ -606,19 +606,6 @@ function floorBed(g, w, d) {
   bedding(g, w, d, 0.08);
 }
 
-// 床头衣柜：0.25 米以下藏在床垫后做踢脚，0.25–0.45 米为高出床垫的下翻门储物格，0.45–0.9 米为床头开放格，上段柜门越过床垫开合
-function bedWardrobe(height = 2.3) {
-  return (g, w, d) => {
-    g.add(box(w, 0.25, d - 0.04, M.cabinet, 0, 0, -0.02));
-    cabinetDoors(g, -w / 2, w / 2, 0.25, 0.2, d, 0.6, M.cabinet, 0.41);
-    g.add(box(w, 0.45, 0.02, M.cabinet, 0, 0.45, -d / 2 + 0.01));
-    for (const x of [-w / 2 + 0.01, w / 2 - 0.01]) g.add(box(0.02, 0.45, d, M.cabinet, x, 0.45));
-    books(g, -w / 2 + 0.08, -w / 2 + 0.38, 0.47, -0.05, d * 0.6);
-    g.add(cyl(0.06, 0.07, 0.12, M.cream, w / 2 - 0.15, 0.45, 0));
-    cabinetDoors(g, -w / 2, w / 2, 0.9, height - 0.9, d, 0.6);
-  };
-}
-
 // 封面朝外的绘本架：后倾背板 + 三层挡条
 function bookRack(g, w, d) {
   const back = box(w, 0.8, 0.02, M.wood, 0, 0, -d / 2 + 0.05);
@@ -811,11 +798,9 @@ function masterBay(g, plan) {
 // 儿童房：房门在西南角向内开，东南凹位为衣柜（门前留 0.6 米），北面整面落地窗
 function kidsRoom(g, plan) {
   const kidChair = (rect, facing) => place(g, rect, facing, chair).scale.setScalar(0.7);
-  if (plan !== 'montessori') place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
+  place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
   if (plan === 'montessori') {
-    place(g, [6.1, 0.92, 6.477, 1.42], 'north', wardrobe());
-    place(g, [6.477, 0.92, 7.67, 1.42], 'north', bedWardrobe());
-    place(g, [6.477, -1.08, 7.677, 0.92], 'north', floorBed);
+    place(g, [6.477, -1.61, 7.677, 0.39], 'north', floorBed);
     place(g, [4.897, -1.61, 5.497, -0.41], 'east', liftDesk(0.6));
     place(g, [4.897, -1.61, 5.147, -0.41], 'east', wallShelves);
     kidChair([5.55, -1.18, 5.9, -0.83], 'west');
