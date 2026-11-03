@@ -17,13 +17,13 @@ const settings = Object.assign(
   { wallMode: 'auto', night: false, labels: true, plan: false, style: STYLES[0].id, plans: {}, brightness: 80, temperature: 3500 },
   loadSettings(),
 );
-if (settings.bayPlan) {
-  settings.plans = { ...settings.plans, masterBay: settings.bayPlan };
-  delete settings.bayPlan;
-}
-for (const plan of PLANS) {
-  if (!plan.options.some((o) => o.id === settings.plans[plan.id])) settings.plans[plan.id] = plan.default;
-}
+delete settings.bayPlan;
+settings.plans = Object.fromEntries(
+  PLANS.map((plan) => {
+    const id = settings.plans?.[plan.id];
+    return [plan.id, plan.options.some((o) => o.id === id) ? id : plan.default];
+  }),
+);
 // 旧版按房间记录灯光，换成按灯具记录后重置为「回家」场景
 if (settings.lightsVersion !== 2) {
   settings.lights = Object.fromEntries(SCENES.home.on.map((id) => [id, true]));
