@@ -606,7 +606,7 @@ export const PLANS = [
     id: 'masterBed', name: '主卧床头', room: 'master', default: 'plain',
     options: [
       { id: 'plain', name: '普通床头' },
-      { id: 'cabinet', name: '床头背板柜' },
+      { id: 'panel', name: '床头背板' },
     ],
   },
   {
@@ -618,16 +618,12 @@ export const PLANS = [
   },
 ];
 
-// 床头背板柜：0.22 米深、1.25 米高，中段软包靠背，上段翻门柜，柜顶木搁板
-function headboardCabinet(g, w, d) {
-  g.add(box(w, 0.95, d, M.cabinet, 0, 0));
-  g.add(box(w - 0.1, 0.45, 0.05, M.linen, 0, 0.47, d / 2 + 0.025));
-  for (const x of [-w / 4, w / 4]) g.add(box(0.01, 0.43, 0.052, M.cabinet, x, 0.48, d / 2 + 0.025));
-  cabinetDoors(g, -w / 2, w / 2, 0.95, 0.27, d, 0.6, M.cabinet, 1.0);
-  g.add(box(w + 0.02, 0.03, d + 0.02, M.walnut, 0, 1.22));
-  books(g, -w / 2 + 0.1, -w / 2 + 0.45, 1.25, 0, d * 0.6);
-  g.add(cyl(0.05, 0.04, 0.12, M.pot, w / 2 - 0.2, 1.25, 0));
-  g.add(sphere(0.09, M.green, w / 2 - 0.2, 1.43, 0));
+// 床头背板：贴墙 5 厘米厚，竖条软包 + 顶部木线条，高 1.3 米
+function headboardPanel(g, w, d) {
+  g.add(box(w, 1.3, d / 2, M.walnut, 0, 0, -d / 4));
+  const n = Math.round(w / 0.2);
+  for (let i = 0; i < n; i++) g.add(box(w / n - 0.015, 1.0, d / 2, M.linen, -w / 2 + (w / n) * (i + 0.5), 0.2, d / 4));
+  g.add(box(w + 0.02, 0.03, d, M.walnut, 0, 1.3));
 }
 
 // 儿童房：房门在西南角向内开，东南凹位为衣柜，北面整面落地窗；成长床南北向靠东墙，床头朝南
@@ -710,9 +706,9 @@ export function buildFurniture(styleId, plans = {}) {
   // 主卧室，北侧为衣帽间（隔断在 layout.js）
   place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
   place(g, [7.147, 2.07, 7.697, 2.78], 'west', wardrobe(2.4));
-  if (plans.masterBed === 'cabinet') {
-    place(g, [7.477, 2.88, 7.697, 4.72], 'west', headboardCabinet);
-    place(g, [5.457, 2.92, 7.477, 4.72], 'west', bed(M.duvet, false));
+  if (plans.masterBed === 'panel') {
+    place(g, [7.647, 2.88, 7.697, 5.12], 'west', headboardPanel);
+    place(g, [5.65, 2.92, 7.647, 4.72], 'west', bed(M.duvet, false));
   } else {
     place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
   }
