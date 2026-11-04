@@ -549,17 +549,6 @@ function liftDesk(top) {
   };
 }
 
-// 护栏：从局部 (x0, z0) 到 (x1, z1)，y0 为底部高度
-function rail(g, [x0, z0], [x1, z1], y0, h = 0.3) {
-  const len = Math.hypot(x1 - x0, z1 - z0);
-  const bar = box(len, 0.03, 0.03, M.wood);
-  bar.position.set((x0 + x1) / 2, y0 + h, (z0 + z1) / 2);
-  bar.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
-  g.add(bar);
-  const n = Math.max(1, Math.round(len / 0.15));
-  for (let i = 0; i <= n; i++) g.add(box(0.02, h, 0.02, M.wood, x0 + ((x1 - x0) * i) / n, y0, z0 + ((z1 - z0) * i) / n));
-}
-
 // 封面朝外的绘本架：后倾背板 + 三层挡条
 function bookRack(g, w, d) {
   const back = box(w, 0.8, 0.02, M.wood, 0, 0, -d / 2 + 0.05);
@@ -626,17 +615,15 @@ function headboardPanel(g, w, d) {
   g.add(box(w + 0.02, 0.03, d, M.walnut, 0, 1.3));
 }
 
-// 儿童房：房门在西南角向内开，东南凹位为衣柜，北面整面落地窗；成长床南北向靠东墙，床头朝南
+// 儿童房：房门在西南角向内开，东南凹位为衣柜，北面整面落地窗；1.2 米单人床南北向靠东墙，床头朝南
 function kidsRoom(g, plan) {
   if (plan === 'window') {
     place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
     place(g, [6.477, -1.61, 7.677, 0.39], 'north', bed(M.kidDuvet));
-    place(g, [6.457, -0.86, 6.477, 0.29], 'east', (gg, w) => rail(gg, [-w / 2, 0], [w / 2, 0], 0.52));
   } else {
     place(g, [6.1, 0.92, 6.477, 1.42], 'north', wardrobe());
     place(g, [6.477, 0.92, 7.67, 1.42], 'north', bedWardrobe());
     place(g, [6.477, -1.08, 7.677, 0.92], 'north', bed(M.kidDuvet, false));
-    place(g, [6.457, -0.33, 6.477, 0.82], 'east', (gg, w) => rail(gg, [-w / 2, 0], [w / 2, 0], 0.52));
   }
   place(g, [4.897, -1.61, 5.497, -0.41], 'east', liftDesk(0.6));
   place(g, [4.897, -1.61, 5.147, -0.41], 'east', wallShelves);
