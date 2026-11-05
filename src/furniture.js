@@ -604,6 +604,7 @@ export const PLANS = [
       { id: 'wardrobe', name: '床头靠衣柜' },
       { id: 'window', name: '床尾靠窗' },
       { id: 'across', name: '横放靠窗' },
+      { id: 'desk', name: '书桌靠窗' },
     ],
   },
 ];
@@ -630,6 +631,17 @@ function kidsRoom(g, plan) {
     place(g, [5.3, -0.15, 5.7, 0.25], 'south', beanbag);
     return;
   }
+  if (plan === 'desk') {
+    place(g, [4.897, -1.63, 7.697, -1.1], 'south', windowDesk(0.05));
+    place(g, [4.897, -1.63, 5.497, -1.38], 'south', wallShelves);
+    place(g, [7.047, -1.63, 7.697, -1.38], 'south', wallShelves);
+    place(g, [6.1, 0.92, 7.67, 1.42], 'north', bedWardrobe());
+    place(g, [6.327, -1.08, 7.677, 0.92], 'north', bed(M.kidDuvet, false));
+    place(g, [5.4, -1.12, 5.85, -0.67], 'north', chair);
+    place(g, [4.897, -0.38, 5.197, 0.07], 'east', bookRack);
+    place(g, [5.3, -0.25, 5.7, 0.15], 'south', beanbag);
+    return;
+  }
   if (plan === 'window') {
     place(g, [6.1, 0.92, 7.67, 1.42], 'north', wardrobe());
     place(g, [6.327, -1.61, 7.677, 0.39], 'north', bed(M.kidDuvet));
@@ -642,6 +654,20 @@ function kidsRoom(g, plan) {
   place(g, [5.55, -1.18, 5.9, -0.83], 'west', chair).scale.setScalar(0.7);
   place(g, [4.897, -0.38, 5.197, 0.07], 'east', bookRack);
   place(g, [5.22, -0.38, 5.62, 0.02], 'south', beanbag);
+}
+
+// 窗前通长书桌：桌面 0.75 米，局部 x 从 storage 到东端桌下为抽屉柜（床尾顶住，不坐人）
+function windowDesk(storage) {
+  return (g, w, d) => {
+    g.add(box(w, 0.035, d, M.walnut, 0, 0.715));
+    g.add(box(0.03, 0.715, d - 0.04, M.walnut, -w / 2 + 0.015, 0, -0.02));
+    for (const y of [0.06, 0.28, 0.5]) cabinetDoors(g, storage, w / 2, y, 0.2, d - 0.04, 0.45, M.cabinet, y + 0.14);
+    g.add(box(0.3, 0.01, 0.22, M.cream, (storage - w / 2) / 2, 0.75, 0.05));
+    g.add(cyl(0.06, 0.07, 0.02, M.brass, -w / 2 + 0.2, 0.75, -d / 2 + 0.12));
+    g.add(cyl(0.008, 0.008, 0.3, M.brass, -w / 2 + 0.2, 0.77, -d / 2 + 0.12));
+    g.add(cyl(0.05, 0.09, 0.1, M.cream, -w / 2 + 0.2, 1.05, -d / 2 + 0.12));
+    books(g, w / 2 - 0.6, w / 2 - 0.2, 0.75, -d / 2 + 0.12, 0.16);
+  };
 }
 
 // 床尾高柜：base 以下封板（床尾挡住），以上柜门越过床垫开合
