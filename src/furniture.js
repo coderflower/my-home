@@ -592,10 +592,11 @@ function rug(parent, [x1, z1, x2, z2]) {
 // 可切换的局部方案：主卧南侧内凹（宽 2.1 米、深 0.8 米的落地窗）书桌、儿童房整体布局
 export const PLANS = [
   {
-    id: 'masterBed', name: '主卧床头', room: 'master', default: 'plain',
+    id: 'masterBed', name: '主卧', room: 'master', default: 'plain',
     options: [
       { id: 'plain', name: '普通床头' },
       { id: 'panel', name: '床头背板' },
+      { id: 'bay', name: '床靠飘窗' },
     ],
   },
   {
@@ -619,6 +620,34 @@ function headboardPanel(g, w, d) {
 }
 
 // 儿童房：房门在西南角向内开，东南凹位为衣柜，北面整面落地窗；床为 1.35 米单人床
+function masterRoom(g, plan) {
+  place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
+  if (plan === 'bay') {
+    place(g, [7.147, 2.07, 7.697, 3.27], 'west', wardrobe(2.4));
+    place(g, [6.097, 3.27, 7.147, 3.32], 'south', (gg, w, d) => gg.add(box(w, 2.4, d, M.walnut, 0, 0)));
+    place(g, [5.65, 3.32, 7.697, 5.12], 'west', platformBed(M.duvet));
+    place(g, [5.15, 3.32, 5.65, 5.12], 'west', bedSteps());
+    place(g, [5.197, 5.12, 7.297, 5.92], 'north', baySill);
+    place(g, [7.0, 5.2, 7.297, 5.5], 'north', tableLamp(0.5, lampMaterials.masterBedside));
+    place(g, [5.197, 5.12, 5.447, 5.92], 'east', wallShelves);
+    place(g, [7.047, 5.12, 7.297, 5.92], 'west', wallShelves);
+    return;
+  }
+  place(g, [7.147, 2.07, 7.697, 2.78], 'west', wardrobe(2.4));
+  if (plan === 'panel') {
+    place(g, [7.647, 2.88, 7.697, 5.12], 'west', headboardPanel);
+    place(g, [5.65, 2.92, 7.647, 4.72], 'west', bed(M.duvet, false));
+  } else {
+    place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
+  }
+  place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
+  place(g, [7.2, 4.72, 7.65, 5.12], 'west', tableLamp(0.52, lampMaterials.masterBedside));
+  place(g, [5.197, 5.37, 7.297, 5.92], 'north', longDesk(0.6));
+  place(g, [5.197, 5.12, 5.447, 5.92], 'east', wallShelves);
+  place(g, [7.047, 5.12, 7.297, 5.92], 'west', wallShelves);
+  place(g, [5.42, 4.86, 5.87, 5.31], 'south', chair);
+}
+
 function kidsRoom(g, plan) {
   if (plan === 'across') {
     place(g, [4.897, -1.63, 6.917, -0.28], 'east', bed(M.kidDuvet));
@@ -677,6 +706,39 @@ function windowDesk(storage) {
     g.add(cyl(0.008, 0.008, 0.3, M.brass, -w / 2 + 0.2, 0.77, -d / 2 + 0.12));
     g.add(cyl(0.05, 0.09, 0.1, M.cream, -w / 2 + 0.2, 1.05, -d / 2 + 0.12));
   };
+}
+
+// 床台：height 高的实木台面与飘窗台齐平，床垫直接铺在台上
+function platformBed(color, height = 0.5) {
+  return (g, w, d) => {
+    g.add(box(w, height, d, M.walnut, 0, 0));
+    const top = new THREE.Group();
+    top.position.y = height - 0.3;
+    bed(color)(top, w, d);
+    g.add(top);
+  };
+}
+
+// 床尾两级台阶：每级三分之一床台高，踏步下为抽屉，前沿朝 +z
+function bedSteps(height = 0.5) {
+  return (g, w, d) => {
+    const rise = height / 3;
+    for (const [h, z0, z1] of [[rise * 2, -d / 2, 0], [rise, 0, d / 2]]) {
+      g.add(box(w, h - 0.03, z1 - z0 - 0.02, M.cabinet, 0, 0, (z0 + z1) / 2 - 0.01));
+      g.add(box(w, 0.03, z1 - z0, M.walnut, 0, h - 0.03, (z0 + z1) / 2));
+      const front = new THREE.Group();
+      front.position.z = z1 - 0.02;
+      cabinetDoors(front, -w / 2, w / 2, h - rise + 0.02, rise - 0.07, 0.02, 0.6, M.cabinet, h - rise / 2 - 0.03);
+      g.add(front);
+    }
+  };
+}
+
+// 飘窗台：0.5 米高台面 + 坐垫，局部 -z 为窗
+function baySill(g, w, d) {
+  g.add(box(w, 0.5, d, M.cream, 0, 0));
+  g.add(box(w - 0.1, 0.06, d - 0.1, M.linen, 0, 0.5));
+  for (const x of [-w / 4, w / 4]) g.add(box(0.45, 0.35, 0.12, M.pillow, x, 0.56, -d / 2 + 0.12));
 }
 
 // 床尾高柜：base 以下封板（床尾挡住），以上柜门越过床垫开合
@@ -769,20 +831,7 @@ export function buildFurniture(styleId, plans = {}) {
   kidsRoom(g, plans.kidsBed);
 
   // 主卧室，北侧为衣帽间（隔断在 layout.js）
-  place(g, [6.097, 1.52, 7.697, 2.07], 'south', wardrobe(2.4));
-  place(g, [7.147, 2.07, 7.697, 2.78], 'west', wardrobe(2.4));
-  if (plans.masterBed === 'panel') {
-    place(g, [7.647, 2.88, 7.697, 5.12], 'west', headboardPanel);
-    place(g, [5.65, 2.92, 7.647, 4.72], 'west', bed(M.duvet, false));
-  } else {
-    place(g, [5.65, 2.92, 7.67, 4.72], 'west', bed(M.duvet));
-  }
-  place(g, [7.2, 4.72, 7.65, 5.12], 'west', nightstand);
-  place(g, [7.2, 4.72, 7.65, 5.12], 'west', tableLamp(0.52, lampMaterials.masterBedside));
-  place(g, [5.197, 5.37, 7.297, 5.92], 'north', longDesk(0.6));
-  place(g, [5.197, 5.12, 5.447, 5.92], 'east', wallShelves);
-  place(g, [7.047, 5.12, 7.297, 5.92], 'west', wallShelves);
-  place(g, [5.42, 4.86, 5.87, 5.31], 'south', chair);
+  masterRoom(g, plans.masterBed);
 
   // 次卧
   place(g, [2.9, 2.22, 4.59, 2.82], 'south', wardrobe());
